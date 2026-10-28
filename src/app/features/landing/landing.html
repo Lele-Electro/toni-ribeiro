@@ -1,0 +1,131 @@
+<section class="hero">
+  <div class="container hero__grid">
+    <div>
+      <span class="eyebrow">Commute together · Earn together</span>
+      <h1>Shared lifts you can trust, and introductions that pay.</h1>
+      <p class="lead">
+        Toni Ribeiro runs a members-only lift club for safe, scheduled shared commuting, and a
+        referral business that rewards you for connecting people with the right services. Pick a
+        date and time online and we'll take it from there.
+      </p>
+      <div class="btn-row">
+        <a routerLink="/schedule" [queryParams]="{ service: 'lift-club' }" class="btn btn--primary"
+          >Book a lift</a
+        >
+        <a routerLink="/referral-business" class="btn btn--ghost">How referrals work</a>
+      </div>
+    </div>
+
+    <svg class="hero__art" viewBox="0 0 360 300" role="img" aria-labelledby="hero-art-title">
+      <title id="hero-art-title">A shared route connecting two pick-up points</title>
+      <rect x="8" y="8" width="344" height="284" rx="28" class="hero__art-bg" />
+      <path d="M70 230 C 130 230, 120 120, 190 120 S 260 70, 290 70" class="hero__art-route" />
+      <circle cx="70" cy="230" r="14" class="hero__art-stop" />
+      <circle cx="190" cy="120" r="10" class="hero__art-mid" />
+      <circle cx="290" cy="70" r="14" class="hero__art-stop" />
+      <rect x="40" y="250" width="110" height="26" rx="13" class="hero__art-chip" />
+      <text x="95" y="268" text-anchor="middle" class="hero__art-text">07:30 pick-up</text>
+      <rect x="225" y="88" width="110" height="26" rx="13" class="hero__art-chip" />
+      <text x="280" y="106" text-anchor="middle" class="hero__art-text">3 seats left</text>
+    </svg>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="offer-heading">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">What we offer</span>
+      <h2 id="offer-heading">Two services, one simple booking</h2>
+      <p>
+        Whether you need a reliable seat to work or want to earn from your network, it starts with
+        choosing a time that suits you.
+      </p>
+    </div>
+
+    <div class="grid grid--2">
+      <article class="card offer">
+        <span class="icon-badge" aria-hidden="true">LC</span>
+        <h3>Private Lift Club</h3>
+        <p>
+          Vetted drivers on fixed routes with booked seats. Share the commute and the cost with
+          people you know, not strangers.
+        </p>
+        <ul>
+          <li>Members-only, invitation-friendly groups</li>
+          <li>Set pick-up times you can plan around</li>
+          <li>Split fuel and toll costs fairly</li>
+        </ul>
+        <a routerLink="/lift-club" class="offer__link">Explore the lift club →</a>
+      </article>
+
+      <article class="card offer">
+        <span class="icon-badge" aria-hidden="true">RB</span>
+        <h3>Referral Business</h3>
+        <p>
+          Introduce clients who need the services we partner with and earn commission on every
+          successful referral.
+        </p>
+        <ul>
+          <li>Transparent, agreed commission</li>
+          <li>We handle the follow-up and paperwork</li>
+          <li>Track every introduction you make</li>
+        </ul>
+        <a routerLink="/referral-business" class="offer__link">Explore referrals →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="how-heading">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">How it works</span>
+      <h2 id="how-heading">From sign-up to seat in three steps</h2>
+    </div>
+    <ol class="steps">
+      <li>
+        <h3>Create your account</h3>
+        <p>Sign up with your email address and a password, or continue with your Google account.</p>
+      </li>
+      <li>
+        <h3>Choose a date and time</h3>
+        <p>
+          Pick when you need a lift or would like a referral consultation. You can add a note for
+          us.
+        </p>
+      </li>
+      <li>
+        <h3>We confirm the details</h3>
+        <p>
+          Your selection is saved to your account, and we follow up to confirm the route or the
+          meeting.
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section--tight" aria-labelledby="privacy-heading">
+  <div class="container privacy-note">
+    <h2 id="privacy-heading">Your information, handled with care</h2>
+    <p>
+      We only ask for what we need to run your bookings: your name, email address and the dates you
+      choose. If you sign in with Google, we receive your name, email address and profile picture,
+      and nothing else. We never sell your data, and you can delete your account and everything
+      stored with it at any time.
+    </p>
+    <a routerLink="/privacy">Read our Privacy Policy</a>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Ready when you are</h2>
+        <p>Choose a date and time in under a minute.</p>
+      </div>
+      <a routerLink="/schedule" class="btn">Pick a date</a>
+    </div>
+  </div>
+</section>

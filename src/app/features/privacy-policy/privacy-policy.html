@@ -1,0 +1,170 @@
+<section class="section">
+  <article class="container prose">
+    <span class="eyebrow">Legal</span>
+    <h1>Privacy Policy</h1>
+    <p class="lead">Last updated: {{ lastUpdated }}</p>
+
+    <p>
+      This policy explains what personal information {{ siteName }} ("we", "us") collects when you
+      use this website, how we use, store and share it, and the choices you have. It applies to our
+      private lift club and referral business services.
+    </p>
+
+    <h2>Information we collect</h2>
+    <h3>When you create an account with email and password</h3>
+    <ul>
+      <li>Your first name and, if you choose to give it, your surname.</li>
+      <li>Your email address.</li>
+      <li>
+        Your password, which we never store in readable form. We keep only a one-way bcrypt hash of
+        it.
+      </li>
+    </ul>
+
+    <h3>When you sign in with Google</h3>
+    <p>
+      If you choose "Sign in with Google", Google shares the following with us, and only after you
+      agree on Google's consent screen:
+    </p>
+    <ul>
+      <li>Your name (given name and family name).</li>
+      <li>Your email address, and whether Google has verified it.</li>
+      <li>Your Google profile picture URL.</li>
+      <li>
+        A unique Google account identifier, which lets us recognise you the next time you sign in.
+      </li>
+    </ul>
+    <p>
+      We request only the basic <code>openid</code>, <code>email</code> and
+      <code>profile</code> permissions. We do not access your Gmail, contacts, calendar, Drive files
+      or any other Google data, and we never receive your Google password.
+    </p>
+
+    <h3>When you use the scheduling form</h3>
+    <ul>
+      <li>The dates and times you choose, the service each one is for, and your time zone.</li>
+      <li>Any note you add, such as a pick-up point.</li>
+    </ul>
+
+    <h2>How we use your information</h2>
+    <ul>
+      <li>To create your account and sign you in.</li>
+      <li>To save the dates and times you choose and show them back to you.</li>
+      <li>To arrange your lift or consultation and contact you about it.</li>
+      <li>To keep the service secure, for example to detect misuse.</li>
+    </ul>
+    <p>
+      We do not use your information for advertising, we do not sell it, and we do not use
+      information received from Google for any purpose other than signing you in and showing your
+      name and picture in your account.
+    </p>
+
+    <h2>Google user data</h2>
+    <p>
+      Our use and transfer of information received from Google APIs adheres to the
+      <a
+        href="https://developers.google.com/terms/api-services-user-data-policy"
+        rel="noopener"
+        target="_blank"
+      >
+        Google API Services User Data Policy</a
+      >, including the Limited Use requirements. Specifically:
+    </p>
+    <ul>
+      <li>
+        <strong>Access:</strong> we only receive the name, email address, profile picture and
+        account identifier listed above.
+      </li>
+      <li>
+        <strong>Use:</strong> we use them only to create and sign in to your account and to
+        personalise your account pages.
+      </li>
+      <li>
+        <strong>Storage:</strong> we store them with your account in our database, protected as
+        described below.
+      </li>
+      <li>
+        <strong>Sharing:</strong> we do not share them with anyone except the hosting providers that
+        run this service for us, and never for advertising.
+      </li>
+      <li><strong>Deletion:</strong> they are deleted when you delete your account.</li>
+    </ul>
+    <p>
+      You can also remove our access at any time from your
+      <a href="https://myaccount.google.com/connections" rel="noopener" target="_blank"
+        >Google Account connections page</a
+      >.
+    </p>
+
+    <h2>How we store and protect your information</h2>
+    <p>
+      Your account and saved dates are stored in a MongoDB database run by our hosting provider.
+      Information is sent over encrypted HTTPS connections. Passwords are hashed with bcrypt. When
+      you sign in we issue a short-lived token (valid for one hour) that your browser keeps in local
+      storage so you stay signed in while you use the site. Signing out removes it.
+    </p>
+
+    <h2>Who we share it with</h2>
+    <p>
+      We share personal information only with service providers who host our website, API and
+      database on our behalf, under agreements that require them to protect it, or where the law
+      requires us to.
+    </p>
+
+    <h2>How long we keep it</h2>
+    <p>
+      We keep your account and saved dates for as long as your account exists. When you delete your
+      account, we delete your profile, your saved dates and any information received from Google
+      straight away.
+    </p>
+
+    <h2>Your choices and rights</h2>
+    <ul>
+      <li>
+        <strong>Delete your account:</strong> sign in, open
+        <a routerLink="/schedule">My Schedule</a> and choose "Delete my account". This permanently
+        removes your account and everything stored with it.
+      </li>
+      <li><strong>Remove a saved date:</strong> use "Remove" next to it on My Schedule.</li>
+      <li>
+        <strong>Access or correct your information:</strong> email us at
+        <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a
+        >.
+      </li>
+    </ul>
+    <p>
+      Depending on where you live, data protection laws (such as South Africa's POPIA or the EU
+      GDPR) may give you further rights, including to object to processing or to complain to a
+      regulator.
+    </p>
+
+    <h2>Cookies and local storage</h2>
+    <p>
+      We don't use advertising or analytics cookies. We use your browser's local storage only to
+      keep you signed in. If you use Sign in with Google, Google may set its own cookies to run the
+      sign-in process, as described in
+      <a href="https://policies.google.com/privacy" rel="noopener" target="_blank"
+        >Google's Privacy Policy</a
+      >.
+    </p>
+
+    <h2>Children</h2>
+    <p>
+      Our services are not directed at children under 16, and we do not knowingly collect their
+      information.
+    </p>
+
+    <h2>Changes to this policy</h2>
+    <p>
+      If we change this policy we will update the date at the top of this page, and tell signed-in
+      users about significant changes.
+    </p>
+
+    <h2>Contact us</h2>
+    <p>
+      Questions about this policy or your information:
+      <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a
+      >.
+    </p>
+  </article>
+</section>

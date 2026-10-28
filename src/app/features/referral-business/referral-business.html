@@ -1,0 +1,105 @@
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">Referral Business</span>
+      <h1>Earn from the introductions you already make.</h1>
+      <p class="lead">
+        When you refer someone who goes on to use one of our partner services, you earn a
+        commission. We do the follow-up and the admin. You keep the relationship and the reward.
+      </p>
+      <div class="btn-row">
+        <a
+          routerLink="/schedule"
+          [queryParams]="{ service: 'referral-business' }"
+          class="btn btn--primary"
+        >
+          Book a consultation
+        </a>
+        <a href="#how" class="btn btn--ghost">See how it works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="section section--muted" aria-labelledby="how-heading">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">How it works</span>
+      <h2 id="how-heading">Refer, we connect, you earn</h2>
+    </div>
+    <ol class="steps">
+      <li>
+        <h3>Book a consultation</h3>
+        <p>
+          Choose a date and time to meet. We'll explain the partner services and agree your
+          commission.
+        </p>
+      </li>
+      <li>
+        <h3>Make an introduction</h3>
+        <p>Share the contact details of someone who needs the service, with their permission.</p>
+      </li>
+      <li>
+        <h3>Get paid on success</h3>
+        <p>When the referral becomes a client, your commission is paid as agreed.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="who-heading">
+  <div class="container">
+    <div class="section-heading">
+      <h2 id="who-heading">Who it's for</h2>
+      <p>You don't need sales experience, just people who trust your recommendations.</p>
+    </div>
+    <div class="grid grid--3">
+      @for (audience of audiences; track audience.title) {
+        <article class="card feature">
+          <span class="icon-badge" aria-hidden="true">{{ audience.badge }}</span>
+          <h3>{{ audience.title }}</h3>
+          <p>{{ audience.text }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="faq-heading">
+  <div class="container">
+    <div class="section-heading">
+      <h2 id="faq-heading">Common questions</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Does it cost anything to join?</summary>
+        <p>No. There is no sign-up fee. You only earn, and only when a referral succeeds.</p>
+      </details>
+      <details>
+        <summary>How is commission agreed?</summary>
+        <p>
+          We agree the commission for each partner service with you in writing during your
+          consultation.
+        </p>
+      </details>
+      <details>
+        <summary>Do the people I refer need to agree?</summary>
+        <p>Yes. Only share someone's details once they have said they're happy to be contacted.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Let's talk about your network</h2>
+        <p>Pick a time for a short consultation.</p>
+      </div>
+      <a routerLink="/schedule" [queryParams]="{ service: 'referral-business' }" class="btn"
+        >Choose a time</a
+      >
+    </div>
+  </div>
+</section>

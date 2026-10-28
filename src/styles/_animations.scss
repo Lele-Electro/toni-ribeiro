@@ -1,0 +1,102 @@
+// Classes applied by Angular's animate.enter / animate.leave. Angular removes an element
+// only after its animate.leave animation ends, so leave classes must actually animate.
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes drop-out {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
+@keyframes slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+.page-enter {
+  animation: page-in 420ms var(--ease-out) both;
+}
+
+.page-leave {
+  animation: page-out 200ms ease-in both;
+  pointer-events: none;
+}
+
+.fade-enter {
+  animation: fade-in 240ms var(--ease-out) both;
+}
+
+.fade-leave {
+  animation: fade-out 160ms ease-in both;
+}
+
+.menu-enter {
+  animation: drop-in 220ms var(--ease-out) both;
+}
+
+.menu-leave {
+  animation: drop-out 160ms ease-in both;
+}
+
+.item-enter {
+  animation: slide-in 320ms var(--ease-out) both;
+}
+
+.item-leave {
+  animation: slide-out 220ms ease-in both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .page-leave,
+  .fade-enter,
+  .fade-leave,
+  .menu-enter,
+  .menu-leave,
+  .item-enter,
+  .item-leave {
+    animation: none !important;
+  }
+}

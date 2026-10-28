@@ -1,0 +1,96 @@
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">Private Lift Club</span>
+      <h1>Your seat, your schedule, people you know.</h1>
+      <p class="lead">
+        The lift club is a private group of commuters who share regular routes. Book a seat for the
+        days you need, travel with vetted drivers, and split the cost of the trip.
+      </p>
+      <div class="btn-row">
+        <a routerLink="/schedule" [queryParams]="{ service: 'lift-club' }" class="btn btn--primary"
+          >Book a seat</a
+        >
+        <a href="#faq" class="btn btn--ghost">Common questions</a>
+      </div>
+    </div>
+
+    <div class="grid grid--3">
+      @for (benefit of benefits; track benefit.title) {
+        <article class="card feature">
+          <span class="icon-badge" aria-hidden="true">{{ benefit.badge }}</span>
+          <h3>{{ benefit.title }}</h3>
+          <p>{{ benefit.text }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="booking-heading">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">Booking a seat</span>
+      <h2 id="booking-heading">How a lift is arranged</h2>
+    </div>
+    <ol class="steps">
+      <li>
+        <h3>Pick a date and time</h3>
+        <p>Choose when you need to be picked up and tell us where in the note.</p>
+      </li>
+      <li>
+        <h3>We match you to a route</h3>
+        <p>We place you with a driver already travelling your way at that time.</p>
+      </li>
+      <li>
+        <h3>Ride and share the cost</h3>
+        <p>Meet at the pick-up point and settle your share of the trip with the driver.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section id="faq" class="section" aria-labelledby="faq-heading">
+  <div class="container">
+    <div class="section-heading">
+      <h2 id="faq-heading">Common questions</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Who can join the lift club?</summary>
+        <p>
+          Anyone with an account can request a seat. Regular members are invited into fixed route
+          groups once we know your usual times.
+        </p>
+      </details>
+      <details>
+        <summary>How much does a lift cost?</summary>
+        <p>
+          The cost of fuel and tolls on a route is shared between the people travelling. We confirm
+          your share before your first trip.
+        </p>
+      </details>
+      <details>
+        <summary>Can I change or cancel a booking?</summary>
+        <p>
+          Yes. You can remove a selection from your schedule at any time, and pick a new date and
+          time.
+        </p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Need a lift this week?</h2>
+        <p>Tell us when, and we'll find you a seat.</p>
+      </div>
+      <a routerLink="/schedule" [queryParams]="{ service: 'lift-club' }" class="btn"
+        >Choose a date</a
+      >
+    </div>
+  </div>
+</section>

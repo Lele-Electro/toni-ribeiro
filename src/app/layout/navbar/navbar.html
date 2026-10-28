@@ -1,0 +1,73 @@
+<header class="navbar">
+  <nav class="navbar__inner container" aria-label="Main">
+    <a routerLink="/" class="brand">
+      <span class="brand__mark" aria-hidden="true">TR</span>
+      <span class="brand__name">Toni Ribeiro</span>
+    </a>
+
+    <div class="navbar__desktop">
+      <ng-container [ngTemplateOutlet]="links" />
+    </div>
+
+    <button
+      type="button"
+      class="navbar__toggle"
+      aria-controls="mobile-menu"
+      [attr.aria-expanded]="menuOpen()"
+      [class.is-open]="menuOpen()"
+      (click)="toggleMenu()"
+    >
+      <span class="sr-only">{{ menuOpen() ? 'Close menu' : 'Open menu' }}</span>
+      <span class="navbar__toggle-bar" aria-hidden="true"></span>
+      <span class="navbar__toggle-bar" aria-hidden="true"></span>
+    </button>
+  </nav>
+
+  @if (menuOpen()) {
+    <div
+      id="mobile-menu"
+      class="navbar__mobile"
+      animate.enter="menu-enter"
+      animate.leave="menu-leave"
+    >
+      <div class="container">
+        <ng-container [ngTemplateOutlet]="links" />
+      </div>
+    </div>
+  }
+</header>
+
+<ng-template #links>
+  <ul class="nav-list">
+    <li>
+      <a routerLink="/lift-club" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+        >Lift Club</a
+      >
+    </li>
+    <li>
+      <a routerLink="/referral-business" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+        Referral Business
+      </a>
+    </li>
+    @if (hydrated() && auth.isAuthenticated()) {
+      <li animate.enter="fade-enter">
+        <a routerLink="/schedule" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+          >My Schedule</a
+        >
+      </li>
+    }
+  </ul>
+
+  <div class="nav-auth">
+    @if (hydrated()) {
+      @if (auth.user(); as user) {
+        <span class="nav-auth__user" animate.enter="fade-enter">Hi, {{ user.name }}</span>
+        <button type="button" class="btn btn--ghost btn--sm" (click)="logout()">Log out</button>
+      } @else {
+        <a routerLink="/login" class="btn btn--primary btn--sm" animate.enter="fade-enter"
+          >Log in</a
+        >
+      }
+    }
+  </div>
+</ng-template>

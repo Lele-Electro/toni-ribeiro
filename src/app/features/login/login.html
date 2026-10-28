@@ -1,0 +1,113 @@
+<section class="section">
+  <div class="container auth">
+    <div class="auth__intro">
+      <span class="eyebrow">Your account</span>
+      <h1>{{ mode() === 'signin' ? 'Welcome back' : 'Create your account' }}</h1>
+      <p class="lead">
+        Book lift club seats and referral consultations, and keep every date and time you choose in
+        one place.
+      </p>
+    </div>
+
+    <div class="card auth__card">
+      <div class="auth__tabs" role="group" aria-label="Choose how to continue">
+        <button
+          type="button"
+          [class.is-active]="mode() === 'signin'"
+          [attr.aria-pressed]="mode() === 'signin'"
+          (click)="setMode('signin')"
+        >
+          Log in
+        </button>
+        <button
+          type="button"
+          [class.is-active]="mode() === 'signup'"
+          [attr.aria-pressed]="mode() === 'signup'"
+          (click)="setMode('signup')"
+        >
+          Create account
+        </button>
+      </div>
+
+      @if (serverError(); as message) {
+        <p
+          class="alert alert--error"
+          role="alert"
+          animate.enter="fade-enter"
+          animate.leave="fade-leave"
+        >
+          {{ message }}
+        </p>
+      }
+
+      @if (googleConfigured) {
+        <app-google-sign-in-button (credential)="onGoogleCredential($event)" />
+        <p class="auth__divider"><span>or use your email</span></p>
+      } @else if (showGoogleSetupHint) {
+        <p class="auth__setup-hint">
+          Development note: set <code>googleClientId</code> in
+          <code>src/environments/environment.development.ts</code> to show the Sign in with Google
+          button.
+        </p>
+      }
+
+      <form [formRoot]="loginForm">
+        @if (mode() === 'signup') {
+          <div class="field-row" animate.enter="menu-enter" animate.leave="menu-leave">
+            <div class="field">
+              <label for="name">First name</label>
+              <input id="name" type="text" autocomplete="given-name" [formField]="loginForm.name" />
+              <app-field-errors [field]="loginForm.name" />
+            </div>
+            <div class="field">
+              <label for="surname">Surname <span class="field__hint">(optional)</span></label>
+              <input
+                id="surname"
+                type="text"
+                autocomplete="family-name"
+                [formField]="loginForm.surname"
+              />
+            </div>
+          </div>
+        }
+
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" type="email" autocomplete="email" [formField]="loginForm.email" />
+          <app-field-errors [field]="loginForm.email" />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            [attr.autocomplete]="mode() === 'signup' ? 'new-password' : 'current-password'"
+            [formField]="loginForm.password"
+          />
+          @if (mode() === 'signup') {
+            <span class="field__hint">At least 8 characters.</span>
+          }
+          <app-field-errors [field]="loginForm.password" />
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn--primary btn--block"
+          [disabled]="loginForm().submitting() || googlePending()"
+        >
+          @if (loginForm().submitting() || googlePending()) {
+            Please wait…
+          } @else {
+            {{ mode() === 'signin' ? 'Log in' : 'Create account' }}
+          }
+        </button>
+      </form>
+
+      <p class="auth__legal">
+        By continuing you agree to our <a routerLink="/terms">Terms of Service</a> and
+        <a routerLink="/privacy">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+</section>

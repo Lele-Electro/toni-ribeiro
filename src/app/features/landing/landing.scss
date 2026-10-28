@@ -1,0 +1,91 @@
+.hero {
+  padding-block: var(--space-8) var(--space-7);
+  background: radial-gradient(1200px 400px at 85% -10%, var(--color-primary-soft), transparent 70%);
+
+  &__grid {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+
+    @media (min-width: 900px) {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
+
+  &__art {
+    width: 100%;
+    max-width: 420px;
+    justify-self: center;
+
+    &-bg {
+      fill: var(--color-surface);
+      stroke: var(--color-border);
+    }
+
+    &-route {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 4;
+      stroke-dasharray: 2 10;
+      stroke-linecap: round;
+    }
+
+    &-stop {
+      fill: var(--color-primary);
+    }
+
+    &-mid {
+      fill: var(--color-accent);
+    }
+
+    &-chip {
+      fill: var(--color-primary-soft);
+    }
+
+    &-text {
+      fill: var(--color-primary);
+      font: 600 12px var(--font-sans);
+    }
+  }
+}
+
+.offer {
+  display: flex;
+  flex-direction: column;
+
+  h3 {
+    margin-top: var(--space-4);
+  }
+
+  p,
+  ul {
+    color: var(--color-muted);
+  }
+
+  ul {
+    padding-left: var(--space-5);
+    margin: 0 0 var(--space-5);
+  }
+
+  &__link {
+    margin-top: auto;
+    font-weight: 650;
+    text-decoration: none;
+  }
+}
+
+.privacy-note {
+  max-width: 760px;
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  p {
+    color: var(--color-muted);
+  }
+
+  a {
+    font-weight: 650;
+  }
+}
