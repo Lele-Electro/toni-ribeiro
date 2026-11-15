@@ -1,10 +1,12 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormField, FormRoot } from '@angular/forms/signals';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { DateSelection, NewDateSelection } from '../../core/date-selections/date-selection.model';
 import { DateSelectionsService } from '../../core/date-selections/date-selections.service';
 import { DateTimeForm } from './date-time-form';
+import { FieldErrors } from '../../shared/field-errors/field-errors';
 
 describe('DateTimeForm', () => {
   let fixture: ComponentFixture<DateTimeForm>;
@@ -34,6 +36,34 @@ describe('DateTimeForm', () => {
           useValue: { user: signal({ name: 'Ann', email: 'ann@example.com' }) },
         },
       ],
+    });
+    // The production UI is intentionally blank. This minimal test-only template
+    // keeps exercising the retained form validation and submission wiring.
+    TestBed.overrideComponent(DateTimeForm, {
+      set: {
+        imports: [FormField, FormRoot, FieldErrors],
+        template: `
+          <form [formRoot]="scheduleForm">
+            <select id="service" [formField]="scheduleForm.service">
+              @for (option of serviceOptions; track option[0]) {
+                <option [value]="option[0]">{{ option[1] }}</option>
+              }
+            </select>
+            <input id="date" type="date" [formField]="scheduleForm.date" />
+            <app-field-errors [field]="scheduleForm.date" />
+            <input id="time" type="time" [formField]="scheduleForm.time" />
+            <app-field-errors [field]="scheduleForm.time" />
+            <textarea id="note" [formField]="scheduleForm.note"></textarea>
+            <button type="submit">Save</button>
+          </form>
+          @if (status(); as current) {
+            <p role="status">{{ current.message }}</p>
+          }
+          @if (!loading() && !dateSelections.selections().length) {
+            <p>No dates yet</p>
+          }
+        `,
+      },
     });
     fixture = TestBed.createComponent(DateTimeForm);
     element = fixture.nativeElement;

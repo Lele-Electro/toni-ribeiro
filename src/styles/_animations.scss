@@ -88,6 +88,22 @@
   animation: slide-out 220ms ease-in both;
 }
 
+// Site-wide safety net: anyone who asks for reduced motion gets no movement, even from a
+// component that forgot its own rule. Components still switch off looping or delayed
+// animations themselves so that nothing waits on a delay.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-delay: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-enter,
   .page-leave,

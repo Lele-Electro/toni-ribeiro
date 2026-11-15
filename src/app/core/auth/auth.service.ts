@@ -48,6 +48,18 @@ export class AuthService {
     return this.authenticate(this.http.post<AuthResponse>(`${this.baseUrl}/signup`, details));
   }
 
+  forgotPassword(email: string): Promise<{ message: string }> {
+    return firstValueFrom(
+      this.http.post<{ message: string }>(`${this.baseUrl}/forgot-password`, { email }),
+    );
+  }
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    await firstValueFrom(this.http.post(`${this.baseUrl}/reset-password`, { token, password }));
+    this.endSession();
+    this.googleIdentity.disableAutoSelect();
+  }
+
   /** Exchanges a Google ID token for this app's own JWT. */
   signInWithGoogle(credential: string): Promise<UserInformation> {
     return this.authenticate(

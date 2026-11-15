@@ -1,91 +1,427 @@
+@use '../../../styles/navbar-placement' as placement;
+
+$green: #1d392c;
+$green-mid: #27503f;
+$green-deep: #142a20;
+
+:host {
+  --bottom-height: clamp(0.8rem, 2vw, 2rem);
+
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) var(--bottom-height);
+  height: 100vh;
+  height: 100dvh;
+  overflow-x: clip;
+}
+
 .hero {
-  padding-block: var(--space-8) var(--space-7);
-  background: radial-gradient(1200px 400px at 85% -10%, var(--color-primary-soft), transparent 70%);
+  --backdrop-skew: -20deg;
 
-  &__grid {
-    display: grid;
-    gap: var(--space-7);
-    align-items: center;
+  position: relative;
+  isolation: isolate;
+  container-type: size;
+  min-height: 0;
+  overflow: hidden;
+  background: #fff;
+}
 
-    @media (min-width: 900px) {
-      grid-template-columns: 1.2fr 1fr;
-    }
+// Two further bands repeat the navbar panel's slant: one edges it on the left, the other
+// carries the green to the right edge of the screen.
+.hero-layers {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    transform: skew(var(--backdrop-skew));
+    animation: band-in 900ms var(--ease-out) both;
   }
 
-  &__art {
+  // A lighter stripe along the main panel's leading edge.
+  &::before {
+    left: 25.6vw;
+    width: 10vw;
+    background: $green-mid;
+    animation-delay: 80ms;
+  }
+
+  &::after {
+    left: 84vw;
+    width: 60vw;
+    background: $green-deep;
+    animation-delay: 160ms;
+  }
+}
+
+.hero-brand {
+  position: absolute;
+  z-index: 1;
+  top: clamp(1rem, 5dvh, 3.125rem);
+  left: clamp(1.25rem, 3vw, 3.5rem);
+  max-width: 22vw;
+  color: #1b4f43;
+  animation: rise-in 700ms 120ms var(--ease-out) both;
+
+  &__name {
+    margin: 0;
+    font-family: Impact, 'Arial Narrow', sans-serif;
+    font-size: clamp(2.25rem, 5vw, 5.5rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  &__line {
+    margin: clamp(0.75rem, 2dvh, 1.25rem) 0 0;
+    padding-top: clamp(0.75rem, 2dvh, 1.25rem);
+    border-top: 3px solid currentColor;
+    font-size: clamp(0.75rem, 1.05vw, 1.05rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+}
+
+.parallogram-background {
+  --backdrop-inset: 0px;
+  --container-left: 28vw;
+
+  position: relative;
+  isolation: isolate;
+  container-type: size;
+  height: 100%;
+  margin-left: var(--container-left);
+  width: 60%;
+
+  // Skew only the backdrop so the portrait keeps its natural proportions.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    inset-inline: var(--backdrop-inset);
+    z-index: -1;
+    background: $green;
+    transform: skew(var(--backdrop-skew));
+  }
+}
+
+.landing-navbar {
+  @include placement.navbar-placement;
+}
+
+.landing-portrait {
+  --portrait-left-gap: 0px;
+  // Follow the backdrop's bottom-left corner, keeping the portrait on screen.
+  // A centered skew shifts this corner by half the container height * tan(angle).
+  --portrait-left: max(
+    calc(var(--portrait-left-gap) - var(--container-left)),
+    calc(var(--backdrop-inset) + 50cqh * tan(var(--backdrop-skew)) + var(--portrait-left-gap))
+  );
+
+  position: absolute;
+  left: var(--portrait-left);
+  bottom: 0;
+  width: auto;
+  height: 78%;
+  max-width: calc(100% - var(--portrait-left));
+  object-fit: contain;
+  object-position: left bottom;
+  animation: rise-in 800ms 200ms var(--ease-out) both;
+}
+
+.hero-video {
+  position: absolute;
+  z-index: 3;
+  top: 54%;
+  right: clamp(1.5rem, 4vw, 5rem);
+  width: clamp(18rem, 36vw, 44rem);
+  margin: 0;
+  overflow: hidden;
+  border: 3px solid rgb(255 255 255 / 90%);
+  border-radius: clamp(1rem, 2vw, 1.75rem);
+  background: #0c1a14;
+  box-shadow: 0 30px 70px rgb(6 18 13 / 45%);
+  translate: 0 -50%;
+  animation: rise-in 800ms 320ms var(--ease-out) both;
+
+  &__media {
+    display: block;
     width: 100%;
-    max-width: 420px;
-    justify-self: center;
+    height: auto;
+    aspect-ratio: 1372 / 760;
+    object-fit: cover;
+  }
 
-    &-bg {
-      fill: var(--color-surface);
-      stroke: var(--color-border);
+  &__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: clamp(4rem, 6vw, 5.5rem);
+    aspect-ratio: 1;
+    padding: 0 0 0 0.25rem; // Optically centres the triangle.
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: $green;
+    box-shadow:
+      0 0 0 0.6rem rgb(255 255 255 / 25%),
+      0 12px 30px rgb(0 0 0 / 35%);
+    translate: -50% -50%;
+    cursor: pointer;
+    transition:
+      scale 200ms var(--ease-out),
+      box-shadow 200ms ease;
+
+    &:hover {
+      scale: 1.07;
+      box-shadow:
+        0 0 0 0.9rem rgb(255 255 255 / 22%),
+        0 12px 30px rgb(0 0 0 / 35%);
     }
 
-    &-route {
-      fill: none;
-      stroke: var(--color-primary);
-      stroke-width: 4;
-      stroke-dasharray: 2 10;
-      stroke-linecap: round;
+    &:active {
+      scale: 0.97;
     }
 
-    &-stop {
-      fill: var(--color-primary);
+    &:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 0.85rem;
     }
+  }
 
-    &-mid {
-      fill: var(--color-accent);
-    }
+  // A soft shade keeps the white control distinct from a bright poster.
+  &:not(.is-playing)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgb(8 22 16 / 28%);
+    pointer-events: none;
+  }
 
-    &-chip {
-      fill: var(--color-primary-soft);
-    }
-
-    &-text {
-      fill: var(--color-primary);
-      font: 600 12px var(--font-sans);
-    }
+  &__play {
+    z-index: 1;
   }
 }
 
-.offer {
+.bottom {
+  --roles-gap: clamp(0.8rem, 1.6vw, 1.6rem);
+  --roles-duration: 30s;
+
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  background: rgb(56, 56, 56);
+  color: #fff;
 
-  h3 {
-    margin-top: var(--space-4);
-  }
-
-  p,
-  ul {
-    color: var(--color-muted);
-  }
-
-  ul {
-    padding-left: var(--space-5);
-    margin: 0 0 var(--space-5);
-  }
-
-  &__link {
-    margin-top: auto;
-    font-weight: 650;
-    text-decoration: none;
+  &:hover .roles-track,
+  &:focus-within .roles-track {
+    animation-play-state: paused;
   }
 }
 
-.privacy-note {
-  max-width: 760px;
+.roles-track {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  width: max-content;
+  height: 100%;
+  animation: scroll-roles var(--roles-duration) linear infinite;
+}
 
-  h2 {
-    font-size: 1.5rem;
+.roles-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--roles-gap);
+  min-width: 100vw;
+  height: 100%;
+  margin: 0;
+  padding: 0 calc(var(--roles-gap) / 2);
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    height: 100%;
+    color: #fff;
+    font-size: clamp(0.6rem, 1.36vw, 1.2rem);
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+}
+
+@keyframes scroll-roles {
+  to {
+    // The second identical group takes the first group's place at the loop boundary.
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+}
+
+@keyframes band-in {
+  from {
+    opacity: 0;
+    transform: translateX(6vw) skew(var(--backdrop-skew));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom {
+    overflow-x: auto;
   }
 
-  p {
-    color: var(--color-muted);
+  .roles-track,
+  .hero-brand,
+  .landing-portrait,
+  .hero-video,
+  .hero-layers::before,
+  .hero-layers::after {
+    animation: none;
   }
 
-  a {
-    font-weight: 650;
+  .hero-video__play {
+    transition: none;
+  }
+
+  .roles-group[aria-hidden='true'] {
+    display: none;
+  }
+}
+
+// Tablets: the navbar spans the screen, so the brand moves below it.
+@media (max-width: 64rem) {
+  .hero-brand {
+    top: clamp(6.5rem, 16dvh, 9rem);
+  }
+}
+
+// Phones: a stacked composition. The whole hero is green with one diagonal band; the
+// brand leads, the video card sits in the middle and Toni rises from the lower left.
+@media (max-width: 40rem) {
+  :host {
+    --bottom-height: 2rem;
+
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-rows: auto auto minmax(15rem, 1fr);
+    container-type: normal;
+    min-height: 36rem;
+    // The wordmark shares the top row with the hamburger (the bar hides its own brand here).
+    padding-top: 1.1rem;
+    background: $green;
+  }
+
+  .hero-layers {
+    &::before {
+      left: 48vw;
+      width: 46vw;
+    }
+
+    &::after {
+      left: 104vw;
+    }
+  }
+
+  .hero-brand {
+    position: relative;
+    top: auto;
+    left: auto;
+    max-width: none;
+    padding: 0 1.25rem 0;
+    color: #fff;
+
+    &__name {
+      padding-right: 3.5rem;
+      font-size: clamp(2.4rem, 11.5vw, 3.25rem);
+      white-space: nowrap;
+
+      br {
+        display: none;
+      }
+    }
+
+    &__line {
+      margin-top: 0.6rem;
+      padding-top: 0.6rem;
+      border-top-width: 2px;
+      font-size: 0.75rem;
+
+      br {
+        display: none;
+      }
+    }
+  }
+
+  .hero-video {
+    position: relative;
+    top: auto;
+    right: auto;
+    grid-row: 2;
+    width: auto;
+    margin: 1.25rem 1.25rem 0;
+    translate: none;
+  }
+
+  // The navbar's bar sits at the top of the screen; the rest of this box holds Toni.
+  .parallogram-background {
+    --container-left: 0px;
+
+    position: static;
+    display: flex;
+    align-items: flex-end;
+    grid-row: 3;
+    container-type: normal;
+    width: 100%;
+    height: auto;
+    min-height: 15rem;
+    margin: 0;
+    isolation: auto;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .landing-portrait {
+    position: relative;
+    left: auto;
+    display: block;
+    width: min(100vw, 27rem);
+    height: auto;
+    max-width: none;
+    margin: 1rem 0 0 -0.75rem;
+  }
+
+  .landing-navbar {
+    top: 0;
+    left: 0;
+  }
+
+  .roles-group li {
+    font-size: 0.8125rem;
   }
 }

@@ -1,0 +1,402 @@
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+// Phones use the dedicated widget; it is only created at phone widths.
+.scheduler-mobile {
+  display: none;
+}
+.scheduler {
+  display: grid;
+  grid-template-columns: minmax(12.5rem, 24.5%) minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: clamp(1.5rem, 3dvh, 2.75rem);
+  background: rgb(242 245 242 / 82%);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 18px 60px rgb(22 47 38 / 16%);
+  color: #193d33;
+}
+.day-pane {
+  min-height: 0;
+  padding: clamp(1rem, 3dvh, 2rem) 1.25rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  background: #d4dbd5;
+}
+.eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+h2 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.15rem, 1.6vw, 1.6rem);
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+}
+.timezone,
+.day-hint,
+.slot-help {
+  color: #4d6358;
+  font-size: 0.75rem;
+}
+.timezone {
+  margin-bottom: clamp(0.6rem, 2dvh, 1.5rem);
+}
+.day-list {
+  display: grid;
+  gap: clamp(0.15rem, 0.6dvh, 0.35rem);
+}
+button,
+input,
+a {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: clamp(2.75rem, 5.6dvh, 3rem);
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: transparent;
+  color: #193d33;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+.day:hover {
+  background: rgb(255 255 255 / 45%);
+}
+.day.selected {
+  background: #1b4f43;
+  color: #fff;
+}
+.day-date {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+.day-hint {
+  margin: clamp(0.6rem, 2dvh, 1.5rem) 0.75rem 0;
+  line-height: 1.7;
+}
+.slot-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(1rem, 3dvh, 2rem) clamp(1rem, 2.5vw, 2.5rem) clamp(0.75rem, 2dvh, 1.5rem);
+}
+.slot-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+}
+h3 {
+  margin: 0;
+  font-size: clamp(1rem, 1.7vw, 1.4rem);
+}
+.slot-help {
+  margin: 0;
+}
+.booking-message {
+  min-height: 1.25rem;
+  margin: 0.4rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.slot-scroll {
+  flex: 1;
+  min-height: 12rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #789184 transparent;
+  padding-right: 0.5rem;
+}
+.slot-row {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr);
+  align-items: center;
+  min-height: 3.9rem;
+  border-top: 1px solid rgb(67 94 79 / 15%);
+}
+.hour-label {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #bacbc0;
+  border-radius: 0.65rem;
+  background: rgb(255 255 255 / 68%);
+  color: #284e3e;
+  text-align: left;
+  font-size: 0.8rem;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+.slot > span:last-child {
+  font-size: 0.7rem;
+}
+.slot:hover:enabled {
+  background: #1b4f43;
+  color: white;
+  border-color: #1b4f43;
+}
+.slot:active:enabled {
+  transform: scale(0.995);
+}
+.slot-row--taken,
+.slot-row--past {
+  color: #727a75;
+  background: rgb(126 135 130 / 9%);
+}
+.slot:disabled {
+  background: rgb(174 181 175 / 30%);
+  border-color: transparent;
+  color: #69716b;
+}
+// The member's own reservation: Toni, the car and the thank-you line fill the row.
+.slot-row--mine {
+  min-height: 4.6rem;
+  background: transparent;
+  color: inherit;
+}
+.slot--mine {
+  flex-wrap: nowrap;
+  gap: 0.9rem;
+  min-height: 3.9rem;
+  padding: 0.3rem 1rem;
+  border-color: #1b4f43;
+  background: linear-gradient(100deg, #dbe6de, #eef3ef);
+  color: #193d33;
+}
+.slot__time {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+.slot__marker {
+  flex: 1;
+}
+.slot__meta {
+  flex-shrink: 0;
+  text-align: right;
+}
+.slot--mine:disabled {
+  background: #e3e8e4;
+  color: #4d6358;
+}
+.slot small {
+  margin-left: 0.4rem;
+  text-decoration: underline;
+}
+.next-day {
+  margin: 0.8rem 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.load-error,
+.form-error {
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  background: #fff0ec;
+  color: #922d24;
+  font-size: 0.8rem;
+}
+.form-error {
+  animation: nudge 320ms var(--ease-out) both;
+}
+.load-error button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+}
+.booking-dialog {
+  position: fixed;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  margin: auto;
+  padding: 2rem;
+  border: 1px solid #d7e0d9;
+  border-radius: 1.5rem;
+  background: #f7f9f5;
+  color: #193d33;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 25%);
+}
+.booking-dialog[open] {
+  animation: dialog-in 260ms var(--ease-out) both;
+}
+.booking-dialog::backdrop {
+  background: rgb(16 35 29 / 50%);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  animation: backdrop-in 220ms ease both;
+}
+.dialog-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+.dialog-close:hover:enabled {
+  background: rgb(27 79 67 / 10%);
+}
+.form-field {
+  margin-bottom: 1rem;
+}
+.booking-dialog label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.field-help,
+.confirmation-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #52675b;
+}
+.confirmation-note {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid #1b4f43;
+  border-radius: 0.5rem;
+  background: #e9f0eb;
+}
+.confirmation-note strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #193d33;
+  font-size: 0.8125rem;
+}
+.field-error {
+  margin: 0.35rem 0 0;
+  color: #b42318;
+  font-size: 0.78rem;
+  font-weight: 600;
+  animation: nudge 320ms var(--ease-out) both;
+}
+.text-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #8caa97;
+  border-radius: 0.6rem;
+  background: white;
+  color: inherit;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.text-input:focus-visible {
+  outline: none;
+  border-color: #1b4f43;
+  box-shadow: 0 0 0 3px rgb(27 79 67 / 22%);
+}
+.text-input[aria-invalid='true'] {
+  border-color: #b42318;
+  box-shadow: 0 0 0 3px rgb(180 35 24 / 12%);
+}
+.cancel-booking {
+  margin-top: 0.5rem;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes nudge {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+@media (max-width: 40rem) {
+  .scheduler {
+    display: none;
+  }
+  .scheduler-mobile {
+    display: block;
+  }
+  // A bottom sheet keeps the form's controls within thumb reach.
+  .booking-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    padding: 1.5rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+  .booking-dialog[open] {
+    animation-name: sheet-in;
+  }
+  .text-input {
+    font-size: 1rem; // Prevents iOS zooming into the field.
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .booking-dialog[open],
+  .booking-dialog::backdrop,
+  .form-error,
+  .field-error {
+    animation: none;
+  }
+  .slot,
+  .day {
+    transition: none;
+  }
+}

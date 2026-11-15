@@ -1,0 +1,148 @@
+:host {
+  display: block;
+}
+
+// Desktop: everything fits in the first viewport. The page slides up behind the navbar so
+// the video runs to the top of the screen, and the slot list scrolls inside the panel.
+.schedule-page {
+  --photo-slant: 20deg;
+  --header: var(--site-header-height, 5rem);
+
+  position: relative;
+  container-type: size;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  min-height: 34rem;
+  margin-top: calc(-1 * var(--header));
+  padding-top: var(--header);
+  overflow: hidden;
+  background: #fff;
+}
+
+.schedule-heading {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: clamp(0.25rem, 1dvh, 0.75rem) 0 clamp(0.5rem, 1.6dvh, 1rem) 5vw;
+  color: #1b4f43;
+  font-family: Impact, 'Arial Narrow', sans-serif;
+  font-size: clamp(1.9rem, 2.9vw, 2.9rem);
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  line-height: 1.1;
+  text-wrap: nowrap;
+}
+
+.schedule-picker {
+  position: relative;
+  z-index: 1;
+  margin: 0 14vw clamp(1rem, 3dvh, 2rem) 5vw;
+}
+
+.schedule-media {
+  position: absolute;
+  inset: 0 0 0 49.4%;
+  background: #12382f;
+  // Opposite to the home page's -20deg slant. The right edge extends off screen.
+  // Clip the frame instead of skewing it so the footage stays upright.
+  clip-path: polygon(0 0, 100% 0, 100% 100%, calc(100cqh * tan(var(--photo-slant))) 100%);
+}
+
+.schedule-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% center;
+  pointer-events: none;
+}
+
+// Phones: the video is the whole background, and the booking widget arrives after it
+// has played for about three seconds.
+@media (max-width: 40rem) {
+  .schedule-page {
+    container-type: normal;
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin-top: 0;
+    padding: 4.75rem 1rem 1.5rem;
+    overflow: visible;
+    // Shows through the video as it dims, keeping white text and the widget legible.
+    background: #0b1c16;
+  }
+
+  .schedule-media {
+    inset: 0;
+    background: none;
+    clip-path: none;
+    animation: media-dim 900ms 3s ease both;
+  }
+
+  .schedule-video {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    object-position: 32% center;
+  }
+
+  .schedule-heading {
+    padding: 0 0 0.75rem 0.25rem;
+    color: #fff;
+    font-size: 2rem;
+    text-shadow: 0 2px 14px rgb(0 0 0 / 55%);
+  }
+
+  .schedule-picker {
+    margin: 0;
+    animation: widget-in 900ms 3s var(--ease-out) both;
+  }
+
+  // The member has already interacted: no wait, just a short fade.
+  .intro-skip {
+    .schedule-media {
+      animation: none;
+      opacity: 0.7;
+    }
+
+    .schedule-picker {
+      animation: widget-in-now 260ms var(--ease-out) both;
+    }
+  }
+}
+
+@keyframes media-dim {
+  to {
+    opacity: 0.7;
+  }
+}
+
+@keyframes widget-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    visibility: hidden;
+  }
+}
+
+@keyframes widget-in-now {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 40rem) and (prefers-reduced-motion: reduce) {
+  .schedule-media {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .schedule-picker,
+  .intro-skip .schedule-picker {
+    animation: none;
+  }
+}

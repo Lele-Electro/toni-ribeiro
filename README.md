@@ -6,6 +6,9 @@ Website for Toni Ribeiro's private lift club and referral business. Visitors can
 account (email and password, or Sign in with Google) and save the dates and times they want
 for a lift or a consultation.
 
+The lift club page includes a seven-day booking scheduler. See [SCHEDULER.md](SCHEDULER.md)
+for MongoDB reservations, the five-minute email confirmation worker, and backend setup.
+
 ## Pages and routes
 
 | Route                | Component          | Access     | Rendering |
@@ -40,6 +43,10 @@ The API lives in the digiterra backend (`C:\development\digiterra-challenge`), u
    for `MONGODB_URI`, `JWT_SECRET` and `GOOGLE_CLIENT_ID`).
 
 2. Start this app with `ng serve` and open `http://localhost:4200/`.
+
+3. Optional: for pickup and drop-off address search, copy `.env.example` to `.env` and set
+   `GOOGLE_MAPS_API_KEY` to a restricted browser key. Without it the booking form accepts
+   typed addresses. In production, set the same variable in the Node host's environment.
 
 `src/environments/environment.development.ts` points at `http://localhost:3000/api/ribeiro`.
 Production values (`siteUrl`, `apiUrl`, `googleClientId`) are in `src/environments/environment.ts`.

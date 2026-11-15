@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-referral-business',
-  imports: [RouterLink],
   templateUrl: './referral-business.html',
   host: {
     class: 'page',

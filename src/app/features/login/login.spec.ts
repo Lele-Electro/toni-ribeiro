@@ -99,6 +99,7 @@ describe('Login', () => {
     expect(auth.signUp).toHaveBeenCalledWith({
       name: 'Neo',
       surname: undefined,
+      phone: undefined,
       email: 'new@example.com',
       password: 'long-enough-1',
     });
@@ -108,5 +109,20 @@ describe('Login', () => {
     await fixture.componentInstance['onGoogleCredential']('google-id-token');
     expect(auth.signInWithGoogle).toHaveBeenCalledWith('google-id-token');
     expect(navigateByUrl).toHaveBeenCalledWith('/schedule');
+  });
+
+  it('accepts an optional cellphone number during registration and rejects invalid input', async () => {
+    expect(element.querySelector('#phone')).toBeNull();
+    await clickTab('Create account');
+    type('#name', 'Neo');
+    type('#email', 'neo@example.com');
+    type('#password', 'long-enough-1');
+    type('#phone', 'not a phone');
+    await submit();
+    expect(auth.signUp).not.toHaveBeenCalled();
+    expect(element.textContent).toContain('7–15 digits');
+    type('#phone', '+27 82 123 4567');
+    await submit();
+    expect(auth.signUp).toHaveBeenCalledWith(expect.objectContaining({ phone: '+27 82 123 4567' }));
   });
 });

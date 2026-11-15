@@ -1,10 +1,68 @@
+@use '../styles/navbar-placement' as placement;
+
 :host {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
+  // Read by pages that need to know how much room the sticky header takes.
+  --header-nav-top: clamp(1rem, 5dvh, 3.125rem);
+  --site-header-height: calc(var(--header-nav-top) + 4.5rem);
+
+  display: block;
 }
 
-main {
-  flex: 1;
-  outline: none;
+// Lift club: a slimmer navbar pill, closer to the top edge.
+:host(.app--compact-header) {
+  --header-nav-top: clamp(0.5rem, 1.6dvh, 1rem);
+  --site-header-height: calc(var(--header-nav-top) + 2.5rem);
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--site-header-height);
+  pointer-events: none;
+
+  &__frame {
+    --container-left: 28vw;
+    --backdrop-skew: -20deg;
+
+    position: absolute;
+    top: 0;
+    left: var(--container-left);
+    width: 60vw;
+    height: calc(100dvh - clamp(0.8rem, 2vw, 2rem));
+    container-type: size;
+    pointer-events: none;
+  }
+}
+
+.shared-navbar {
+  @include placement.navbar-placement;
+  pointer-events: auto;
+}
+
+// After the mixin so that it wins over the mixin's own --nav-top.
+:host(.app--compact-header) .shared-navbar {
+  --nav-top: var(--header-nav-top);
+}
+
+@media (max-width: 64rem) {
+  :host {
+    --site-header-height: calc(var(--header-nav-top) + 7.5rem);
+  }
+
+  :host(.app--compact-header) {
+    --site-header-height: calc(var(--header-nav-top) + 4.25rem);
+  }
+}
+
+// Phones: the navbar becomes a single bar with a hamburger (see MobileMenu).
+@media (max-width: 40rem) {
+  :host {
+    --site-header-height: 4.25rem;
+  }
+
+  // The lift club's video fills the screen, so its header floats over the page.
+  :host(.app--compact-header) {
+    --site-header-height: 0px;
+  }
 }

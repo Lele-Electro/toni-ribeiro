@@ -1,6 +1,5 @@
-import { DatePipe } from '@angular/common';
 import { Component, afterNextRender, inject, input, linkedSignal, signal } from '@angular/core';
-import { FormField, FormRoot, form, maxLength, required, validate } from '@angular/forms/signals';
+import { form, maxLength, required, validate } from '@angular/forms/signals';
 import { AuthService } from '../../core/auth/auth.service';
 import {
   DateSelection,
@@ -12,7 +11,6 @@ import {
   toNewDateSelection,
 } from '../../core/date-selections/date-selections.service';
 import { httpErrorMessage } from '../../core/http-error-message';
-import { FieldErrors } from '../../shared/field-errors/field-errors';
 
 const isServiceKind = (value: unknown): value is ServiceKind =>
   typeof value === 'string' && value in SERVICE_LABELS;
@@ -24,7 +22,6 @@ interface Status {
 
 @Component({
   selector: 'app-date-time-form',
-  imports: [FormField, FormRoot, FieldErrors, DatePipe],
   templateUrl: './date-time-form.html',
   styleUrl: './date-time-form.scss',
   host: {

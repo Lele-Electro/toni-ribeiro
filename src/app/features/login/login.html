@@ -69,6 +69,18 @@
               />
             </div>
           </div>
+          <div class="field" animate.enter="menu-enter" animate.leave="menu-leave">
+            <label for="phone">Cellphone number <span class="field__hint">(optional)</span></label>
+            <input
+              id="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="082 123 4567 or +27 82 123 4567"
+              [formField]="loginForm.phone"
+            />
+            <app-field-errors [field]="loginForm.phone" />
+          </div>
         }
 
         <div class="field">
@@ -90,6 +102,10 @@
           }
           <app-field-errors [field]="loginForm.password" />
         </div>
+
+        @if (mode() === 'signin') {
+          <p><a routerLink="/forgot-password">Forgot your password?</a></p>
+        }
 
         <button
           type="submit"

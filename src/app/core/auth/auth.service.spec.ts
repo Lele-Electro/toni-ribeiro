@@ -36,6 +36,30 @@ describe('AuthService', () => {
 
   afterEach(() => http.verify());
 
+  it('requests recovery without changing the current session', async () => {
+    const auth = TestBed.inject(AuthService);
+    const request = auth.forgotPassword('ann@example.com');
+    const req = http.expectOne(`${environment.apiUrl}/user/forgot-password`);
+    expect(req.request.body).toEqual({ email: 'ann@example.com' });
+    req.flush({ message: 'Check your inbox' });
+    expect(await request).toEqual({ message: 'Check your inbox' });
+    expect(auth.isAuthenticated()).toBe(false);
+  });
+
+  it('clears a saved session after resetting the password without automatically signing in', async () => {
+    const auth = TestBed.inject(AuthService);
+    const login = auth.signIn({ email: 'ann@example.com', password: 'secret-123' });
+    http.expectOne(`${environment.apiUrl}/user/signin`).flush(authResponse());
+    await login;
+    const request = auth.resetPassword('a'.repeat(64), 'new-password-123');
+    const req = http.expectOne(`${environment.apiUrl}/user/reset-password`);
+    expect(req.request.body).toEqual({ token: 'a'.repeat(64), password: 'new-password-123' });
+    req.flush({ message: 'Password changed' });
+    await request;
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
   it('signs in, exposes the user and persists the session', async () => {
     const auth = TestBed.inject(AuthService);
     const result = auth.signIn({ email: 'ann@example.com', password: 'secret-123' });

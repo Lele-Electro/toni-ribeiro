@@ -1,0 +1,29 @@
+// Shared by the landing page and the inner-page header's matching viewport frame.
+@mixin navbar-placement {
+  --navbar-scale: 0.5;
+  --nav-top: clamp(1rem, 5dvh, 3.125rem);
+  --nav-gap: clamp(1rem, 3vw, 3.125rem);
+  --nav-skew-shift: calc((var(--nav-top) - 50cqh) * tan(var(--backdrop-skew)));
+
+  position: absolute;
+  z-index: 2;
+  top: var(--nav-top);
+  left: calc(50% + var(--nav-skew-shift));
+  width: min(55rem, calc(100% + 6rem * tan(var(--backdrop-skew)) - 2 * var(--nav-gap)));
+  transform: translateX(-50%) scale(var(--navbar-scale));
+  transform-origin: top center;
+
+  @media (max-width: 64rem) {
+    --navbar-scale: 1;
+    left: calc(50vw - var(--container-left));
+    width: min(55rem, calc(100vw - 2 * var(--nav-gap)));
+  }
+
+  // Phones: a full-width bar at the very top holding the brand and the hamburger.
+  @media (max-width: 40rem) {
+    top: 0;
+    left: calc(-1 * var(--container-left));
+    width: 100vw;
+    transform: none;
+  }
+}

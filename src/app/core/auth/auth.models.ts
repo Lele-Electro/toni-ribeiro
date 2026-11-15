@@ -3,6 +3,7 @@ export interface UserInformation {
   email: string;
   name: string;
   surname: string | null;
+  phone?: string | null;
   picture: string | null;
   authProviders: ('password' | 'google')[];
 }
@@ -23,4 +24,5 @@ export interface SignInCredentials {
 export interface SignUpDetails extends SignInCredentials {
   name: string;
   surname?: string;
+  phone?: string;
 }

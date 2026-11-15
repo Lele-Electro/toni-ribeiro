@@ -1,6 +1,8 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
+  { path: 'forgot-password', renderMode: RenderMode.Server },
+  { path: 'reset-password', renderMode: RenderMode.Client },
   {
     // The session lives in the browser, so the server can't know who is signed in here
     path: 'schedule',

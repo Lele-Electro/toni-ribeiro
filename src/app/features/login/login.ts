@@ -7,6 +7,7 @@ import {
   maxLength,
   minLength,
   required,
+  validate,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
@@ -41,12 +42,22 @@ export class Login {
   protected readonly serverError = signal<string | null>(null);
   protected readonly googlePending = signal(false);
 
-  private readonly model = signal({ name: '', surname: '', email: '', password: '' });
+  private readonly model = signal({ name: '', surname: '', phone: '', email: '', password: '' });
   protected readonly loginForm = form(
     this.model,
     (path) => {
       const signingUp = () => this.mode() === 'signup';
       required(path.name, { message: 'Please enter your first name', when: signingUp });
+      maxLength(path.phone, 40, { message: 'Use 40 characters or fewer', when: signingUp });
+      validate(path.phone, ({ value }) => {
+        const phone = value().trim();
+        if (!signingUp() || !phone || /^\+?\d{7,15}$/.test(phone.replace(/[\s().-]/g, '')))
+          return null;
+        return {
+          kind: 'phone',
+          message: 'Enter a cellphone number with 7–15 digits, or leave it blank',
+        };
+      });
       required(path.email, { message: 'Please enter your email address' });
       email(path.email, { message: 'Please enter a valid email address' });
       required(path.password, { message: 'Please enter your password' });
@@ -77,10 +88,16 @@ export class Login {
 
   private async submit(): Promise<null> {
     this.serverError.set(null);
-    const { name, surname, email, password } = this.model();
+    const { name, surname, phone, email, password } = this.model();
     try {
       if (this.mode() === 'signup') {
-        await this.auth.signUp({ name, surname: surname || undefined, email, password });
+        await this.auth.signUp({
+          name,
+          surname: surname || undefined,
+          phone: phone.trim() || undefined,
+          email,
+          password,
+        });
       } else {
         await this.auth.signIn({ email, password });
       }

@@ -1,0 +1,74 @@
+<div class="place">
+  <input
+    #field
+    class="place__input"
+    type="text"
+    role="combobox"
+    autocomplete="off"
+    autocapitalize="words"
+    spellcheck="false"
+    enterkeyhint="next"
+    aria-autocomplete="list"
+    aria-required="true"
+    maxlength="300"
+    [id]="inputId()"
+    [placeholder]="placeholder()"
+    [value]="place().address"
+    [disabled]="disabled()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="inputId() + '-suggestions'"
+    [attr.aria-activedescendant]="
+      activeIndex() >= 0 ? inputId() + '-suggestion-' + activeIndex() : null
+    "
+    [attr.aria-invalid]="invalid() ? 'true' : null"
+    [attr.aria-describedby]="describedBy() || null"
+    (focus)="warmUp()"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+    (blur)="close()"
+  />
+  @if (place().placeId) {
+    <span class="place__pin" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18">
+        <path
+          fill="currentColor"
+          d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"
+        />
+      </svg>
+    </span>
+  }
+  <ul
+    class="place__list"
+    role="listbox"
+    [id]="inputId() + '-suggestions'"
+    [hidden]="!open()"
+    aria-label="Suggested addresses"
+  >
+    @for (suggestion of suggestions(); track suggestion.id; let index = $index) {
+      <!-- pointerdown is cancelled so the input keeps focus until the click lands -->
+      <li
+        role="option"
+        class="place__option"
+        [id]="inputId() + '-suggestion-' + index"
+        [class.is-active]="activeIndex() === index"
+        [attr.aria-selected]="activeIndex() === index"
+        (pointerdown)="$event.preventDefault()"
+        (click)="choose(suggestion)"
+      >
+        <span class="place__primary">{{ suggestion.primary }}</span>
+        @if (suggestion.secondary) {
+          <span class="place__secondary">{{ suggestion.secondary }}</span>
+        }
+      </li>
+    }
+    <li class="place__attribution" role="presentation">Powered by Google</li>
+  </ul>
+  <span class="sr-only" role="status">
+    {{ open() ? suggestions().length + ' suggested addresses. Use the arrow keys to choose.' : '' }}
+  </span>
+</div>
+@if (places.unavailable()) {
+  <p class="place__fallback">
+    Address search is unavailable right now. Please type the full address.
+  </p>
+}

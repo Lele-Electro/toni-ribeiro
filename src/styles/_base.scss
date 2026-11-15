@@ -9,6 +9,11 @@ html {
   scroll-padding-top: calc(var(--navbar-height) + var(--space-4));
 }
 
+// Set while the phone navigation overlay is open, so the page behind can't scroll.
+html.nav-open {
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);

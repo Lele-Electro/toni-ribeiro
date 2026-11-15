@@ -56,12 +56,9 @@ export class GoogleIdentityService {
   ): Promise<void> {
     const accountsId = await this.load();
     this.credentialHandler = onCredential;
-    const prefersDark = this.document.defaultView?.matchMedia(
-      '(prefers-color-scheme: dark)',
-    ).matches;
     accountsId.renderButton(host, {
       type: 'standard',
-      theme: prefersDark ? 'filled_black' : 'outline',
+      theme: 'outline',
       size: 'large',
       text,
       shape: 'rectangular',

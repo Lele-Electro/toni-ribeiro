@@ -1,0 +1,72 @@
+<div class="bar" [class.bar--frosted]="appearance() === 'frosted'">
+  <a class="bar__brand" routerLink="/">Toni Ribeiro</a>
+  <button
+    #trigger
+    type="button"
+    class="burger"
+    [class.burger--open]="phase() === 'open'"
+    aria-label="Open menu"
+    aria-haspopup="dialog"
+    aria-controls="mobile-navigation"
+    [attr.aria-expanded]="phase() !== 'closed'"
+    (click)="open()"
+  >
+    <span class="burger__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+</div>
+
+<dialog
+  #menu
+  id="mobile-navigation"
+  class="overlay"
+  [class.overlay--open]="phase() === 'open'"
+  aria-label="Menu"
+  (cancel)="onCancel($event)"
+  (click)="onOverlayClick($event)"
+>
+  <div class="overlay__bar">
+    <a class="bar__brand" routerLink="/" (click)="close()">Toni Ribeiro</a>
+    <!-- Sits exactly over the hamburger, so the bars appear to turn into the X. -->
+    <button
+      type="button"
+      class="burger burger--light"
+      [class.burger--open]="phase() === 'open'"
+      aria-label="Close menu"
+      autofocus
+      (click)="close()"
+    >
+      <span class="burger__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+  </div>
+
+  <nav class="overlay__nav" aria-label="Main navigation">
+    <ul class="overlay__list">
+      @for (item of items; track item.key; let index = $index) {
+        <li [style.--i]="index">
+          <a
+            class="overlay__link"
+            [routerLink]="item.path"
+            [queryParams]="item.query"
+            [class.is-current]="activeKey() === item.key"
+            [attr.aria-current]="activeKey() === item.key ? 'page' : null"
+            (click)="close()"
+            >{{ item.label }}</a
+          >
+        </li>
+      }
+    </ul>
+    <div class="overlay__account" [style.--i]="items.length">
+      @if (authenticated()) {
+        <button type="button" class="overlay__auth" (click)="signOut()">Log out</button>
+      } @else {
+        <a
+          class="overlay__auth"
+          routerLink="/login"
+          [attr.aria-current]="activeKey() === 'account' ? 'page' : null"
+          (click)="close()"
+          >Log in</a
+        >
+      }
+    </div>
+  </nav>
+</dialog>

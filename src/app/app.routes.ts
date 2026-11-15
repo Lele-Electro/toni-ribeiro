@@ -38,6 +38,20 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login').then((m) => m.Login),
   },
   {
+    path: 'forgot-password',
+    title: 'Recover your password',
+    data: { robots: 'noindex, nofollow' } satisfies SeoRouteData,
+    loadComponent: () =>
+      import('./features/password-recovery/password-recovery').then((m) => m.PasswordRecovery),
+  },
+  {
+    path: 'reset-password',
+    title: 'Reset your password',
+    data: { resetPassword: true, robots: 'noindex, nofollow' },
+    loadComponent: () =>
+      import('./features/password-recovery/password-recovery').then((m) => m.PasswordRecovery),
+  },
+  {
     path: 'schedule',
     title: 'Choose a date and time',
     canActivate: [authGuard],

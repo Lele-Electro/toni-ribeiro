@@ -24,16 +24,22 @@ app.use((req, res, next) => {
 });
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Public runtime configuration for the browser. The Maps key is a browser key that is
+ * restricted by HTTP referrer and API in Google Cloud; it is read from the environment
+ * (or the ignored .env file) so that it never has to be committed.
  */
+try {
+  process.loadEnvFile();
+} catch {
+  // No .env file: rely on the platform's environment variables.
+}
+
+app.get('/app-config.json', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const key = process.env['GOOGLE_MAPS_API_KEY']?.trim() ?? '';
+  // The untouched placeholder from .env.example counts as "no key".
+  res.json({ googleMapsApiKey: key.startsWith('replace-') ? '' : key });
+});
 
 /**
  * Serve static files from /browser

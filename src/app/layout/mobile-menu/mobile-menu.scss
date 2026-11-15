@@ -1,0 +1,236 @@
+// Shown only at phone widths; the desktop pill navbar is hidden there (see navbar.scss).
+:host {
+  display: none;
+}
+
+@media (max-width: 40rem) {
+  :host {
+    display: block;
+  }
+}
+
+.bar,
+.overlay__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.25rem;
+  margin: 0.5rem 0.75rem;
+  padding: 0 0.25rem 0 1rem;
+  // Reserved so the frosted variant's border doesn't shift the hamburger.
+  border: 1px solid transparent;
+  color: #fff;
+}
+
+// The home page shows its own large wordmark beside the hamburger.
+.bar:not(.bar--frosted) .bar__brand {
+  visibility: hidden;
+}
+
+.bar--frosted {
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 999px;
+  background: rgb(242 245 242 / 80%);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 8px 30px rgb(22 47 38 / 14%);
+  color: #193d33;
+}
+
+.bar__brand {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: inherit;
+  font-family: Impact, 'Arial Narrow', sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.burger {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.burger__bars {
+  position: relative;
+  display: block;
+  width: 1.5rem;
+  height: 1.125rem;
+
+  span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition:
+      transform 260ms var(--ease-out),
+      opacity 160ms ease;
+
+    &:nth-child(1) {
+      top: 0;
+    }
+
+    &:nth-child(2) {
+      top: calc(50% - 1px);
+    }
+
+    &:nth-child(3) {
+      bottom: 0;
+    }
+  }
+}
+
+// The outer bars meet in the middle and cross; the middle bar fades away.
+.burger--open .burger__bars span {
+  &:nth-child(1) {
+    transform: translateY(0.5rem) rotate(45deg);
+  }
+
+  &:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0.2);
+  }
+
+  &:nth-child(3) {
+    transform: translateY(-0.5rem) rotate(-45deg);
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  background:
+    linear-gradient(115deg, transparent 58%, rgb(255 255 255 / 5%) 58% 74%, transparent 74%),
+    #12382f;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 220ms ease;
+
+  &::backdrop {
+    background: #12382f;
+  }
+}
+
+.overlay--open {
+  opacity: 1;
+}
+
+.overlay__nav {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem 1.75rem calc(2rem + env(safe-area-inset-bottom));
+}
+
+.overlay__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.overlay__list li,
+.overlay__account {
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition:
+    opacity 260ms ease,
+    transform 320ms var(--ease-out);
+}
+
+.overlay--open .overlay__list li,
+.overlay--open .overlay__account {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(60ms + var(--i) * 35ms);
+}
+
+.overlay__link {
+  display: flex;
+  align-items: center;
+  min-height: 3.5rem;
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+
+  &.is-current {
+    font-weight: 800;
+
+    &::before {
+      content: '';
+      width: 0.5rem;
+      height: 0.5rem;
+      margin-right: 0.75rem;
+      border-radius: 50%;
+      background: #fff;
+    }
+  }
+}
+
+.overlay__auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #12382f;
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bar :focus-visible,
+.overlay :focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+.overlay__auth:focus-visible {
+  outline-color: #fff;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlay__list li,
+  .overlay__account,
+  .burger__bars span {
+    transition: none;
+  }
+
+  .overlay--open .overlay__list li,
+  .overlay--open .overlay__account {
+    transition-delay: 0s;
+  }
+}

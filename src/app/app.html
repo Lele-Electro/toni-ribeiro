@@ -1,6 +1,8 @@
-<a class="skip-link" href="#main">Skip to content</a>
-<app-navbar />
-<main id="main" class="app-outlet" tabindex="-1">
-  <router-outlet />
-</main>
-<app-footer />
+@if (showNavbar()) {
+  <header class="site-header">
+    <div class="site-header__frame">
+      <app-navbar class="shared-navbar" appearance="frosted" [compact]="compactHeader()" />
+    </div>
+  </header>
+}
+<router-outlet />
