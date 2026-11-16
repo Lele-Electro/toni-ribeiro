@@ -8,10 +8,11 @@
   display: block;
 }
 
-// Lift club: a slimmer navbar pill, closer to the top edge.
+// Lift club: the navbar pill is the same size as on the home page, but sits closer to
+// the top edge so the whole schedule stays in view.
 :host(.app--compact-header) {
   --header-nav-top: clamp(0.5rem, 1.6dvh, 1rem);
-  --site-header-height: calc(var(--header-nav-top) + 2.5rem);
+  --site-header-height: calc(var(--header-nav-top) + 3.25rem);
 }
 
 .site-header {
@@ -51,7 +52,7 @@
   }
 
   :host(.app--compact-header) {
-    --site-header-height: calc(var(--header-nav-top) + 4.25rem);
+    --site-header-height: calc(var(--header-nav-top) + 6.5rem);
   }
 }
 

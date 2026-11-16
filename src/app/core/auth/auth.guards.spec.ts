@@ -36,7 +36,7 @@ describe('auth guards', () => {
 
   it('guestGuard keeps signed-in users off the login page', () => {
     isAuthenticated.set(true);
-    expect(serialize(run(guestGuard))).toBe('/schedule');
+    expect(serialize(run(guestGuard))).toBe('/lift-club');
 
     isAuthenticated.set(false);
     expect(run(guestGuard)).toBe(true);

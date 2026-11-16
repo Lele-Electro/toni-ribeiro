@@ -43,15 +43,21 @@
     <ul class="overlay__list">
       @for (item of items; track item.key; let index = $index) {
         <li [style.--i]="index">
-          <a
-            class="overlay__link"
-            [routerLink]="item.path"
-            [queryParams]="item.query"
-            [class.is-current]="activeKey() === item.key"
-            [attr.aria-current]="activeKey() === item.key ? 'page' : null"
-            (click)="close()"
-            >{{ item.label }}</a
-          >
+          @if (item.disabled) {
+            <span class="overlay__link is-disabled" aria-disabled="true"
+              >{{ item.label }} <small class="overlay__soon">Soon</small></span
+            >
+          } @else {
+            <a
+              class="overlay__link"
+              [routerLink]="item.path"
+              [queryParams]="item.query"
+              [class.is-current]="activeKey() === item.key"
+              [attr.aria-current]="activeKey() === item.key ? 'page' : null"
+              (click)="close()"
+              >{{ item.label }}</a
+            >
+          }
         </li>
       }
     </ul>

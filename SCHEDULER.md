@@ -21,16 +21,17 @@ bookings even between refreshes. Failed availability requests disable new bookin
 
 Every booking now also requires a **WhatsApp number**, a **Pickup location** and a
 **Drop-off location**. The API validates all three (`backend/services/lift-schedule.js`)
-and stores the address plus, when the member picked a Google suggestion, the Place ID
-and coordinates. Older reservations without these fields stay readable; editing one
-asks for the missing details.
+and stores the address plus, when the member picked a suggestion, its coordinates.
+Older reservations without these fields stay readable; editing one asks for the
+missing details.
 
-Address search uses Google Places Autocomplete (New) through the Maps JavaScript API.
-Maps loads only when an address field is first focused, each search uses a session
-token, and Place Details requests only `formattedAddress` and `location`. The browser
-key is read at runtime from `GOOGLE_MAPS_API_KEY` (see `.env.example`; `.env` is ignored
-by Git) and served to the browser by `src/server.ts` at `/app-config.json`. Without a
-key, or if Maps fails, the fields accept a typed address.
+Address search uses Photon (`https://photon.komoot.io`), a free OpenStreetMap geocoder
+that needs no key (`src/app/core/maps/address-search.service.ts`). Results are limited
+to South Africa and ranked from Johannesburg outwards. Photon's public server is
+offered under fair use, so lookups wait 300ms after the last keystroke and start at
+three characters. If Photon fails, the fields accept a typed address. The earlier
+Google Places implementation is commented out in `google-places.service.ts` and
+`src/server.ts`; it was switched off because it requires Google Cloud billing.
 
 At phone widths (40rem and below) the table is replaced by `MobileBookingWidget`, which
 shows one day at a time, a swipeable row of hours and one action button. It reads the

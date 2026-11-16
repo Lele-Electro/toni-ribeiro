@@ -1,4 +1,4 @@
-@use '../../../styles/navbar-placement' as placement;
+﻿@use '../../../styles/navbar-placement' as placement;
 
 $green: #1d392c;
 $green-mid: #27503f;
@@ -85,6 +85,22 @@ $green-deep: #142a20;
     letter-spacing: 0.14em;
     line-height: 1.5;
     text-transform: uppercase;
+  }
+}
+
+// Bottom left, on the same left edge as the name, clear of the services bar below.
+.hero-joburg {
+  position: absolute;
+  z-index: 1;
+  bottom: clamp(1.25rem, 4dvh, 2.75rem);
+  left: clamp(1.25rem, 3vw, 3.5rem);
+  width: clamp(4.5rem, 7.5vw, 9rem);
+  animation: rise-in 700ms 260ms var(--ease-out) both;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -291,6 +307,7 @@ $green-deep: #142a20;
 
   .roles-track,
   .hero-brand,
+  .hero-joburg,
   .landing-portrait,
   .hero-video,
   .hero-layers::before,
@@ -327,7 +344,8 @@ $green-deep: #142a20;
 
   .hero {
     display: grid;
-    grid-template-rows: auto auto minmax(15rem, 1fr);
+    // Brand, video, the Joburg mark, then Toni.
+    grid-template-rows: auto auto auto minmax(15rem, 1fr);
     container-type: normal;
     min-height: 36rem;
     // The wordmark shares the top row with the hamburger (the bar hides its own brand here).
@@ -386,6 +404,18 @@ $green-deep: #142a20;
     translate: none;
   }
 
+  // Under the video's left edge, in a row of its own so it never covers Toni.
+  .hero-joburg {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    grid-area: 3 / 1;
+    align-self: start;
+    justify-self: start;
+    width: 4.75rem;
+    margin: 1.25rem 0 0 1.25rem;
+  }
+
   // The navbar's bar sits at the top of the screen; the rest of this box holds Toni.
   .parallogram-background {
     --container-left: 0px;
@@ -393,7 +423,7 @@ $green-deep: #142a20;
     position: static;
     display: flex;
     align-items: flex-end;
-    grid-row: 3;
+    grid-area: 4 / 1;
     container-type: normal;
     width: 100%;
     height: auto;

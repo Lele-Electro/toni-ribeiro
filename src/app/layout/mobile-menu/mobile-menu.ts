@@ -13,12 +13,15 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, PRIMARY_OUTLET, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
+import { isUnavailable } from '../../core/navigation';
 
 interface MenuItem {
   key: string;
   label: string;
   path: string;
   query?: Record<string, string>;
+  /** The page has no content yet: listed, but not a link. */
+  disabled?: boolean;
 }
 
 const CLOSE_MS = 220;
@@ -50,15 +53,17 @@ export class MobileMenu {
   protected readonly phase = signal<'closed' | 'open' | 'closing'>('closed');
 
   /** Every destination of the desktop navbar, including those under its "Other" menu. */
-  protected readonly items: MenuItem[] = [
-    { key: 'home', label: 'Home', path: '/' },
-    { key: 'lift-club', label: 'Private Lift Club', path: '/lift-club' },
-    { key: 'referral-business', label: 'Referral Business', path: '/referral-business' },
-    { key: 'schedule', label: 'My Schedule', path: '/schedule' },
-    { key: 'contact', label: 'Contact', path: '/schedule', query: { service: 'general' } },
-    { key: 'privacy', label: 'Privacy Policy', path: '/privacy' },
-    { key: 'terms', label: 'Terms of Service', path: '/terms' },
-  ];
+  protected readonly items: MenuItem[] = (
+    [
+      { key: 'home', label: 'Home', path: '/' },
+      { key: 'lift-club', label: 'Private Lift Club', path: '/lift-club' },
+      { key: 'referral-business', label: 'Referral Business', path: '/referral-business' },
+      { key: 'schedule', label: 'My Schedule', path: '/schedule' },
+      { key: 'contact', label: 'Contact', path: '/schedule', query: { service: 'general' } },
+      { key: 'privacy', label: 'Privacy Policy', path: '/privacy' },
+      { key: 'terms', label: 'Terms of Service', path: '/terms' },
+    ] satisfies MenuItem[]
+  ).map((item) => ({ ...item, disabled: isUnavailable(item.path) }));
 
   protected readonly activeKey = computed(() => {
     const url = this.router.parseUrl(this.currentUrl());

@@ -27,7 +27,7 @@ export class SeoTitleStrategy extends TitleStrategy {
     const pageTitle = this.buildTitle(snapshot);
     const title = pageTitle
       ? `${pageTitle} | ${SITE_NAME}`
-      : `${SITE_NAME} | Private Lift Club & Referral Business`;
+      : `${SITE_NAME} | Tailored Services`;
     const data = this.deepestChild(snapshot.root).data as SeoRouteData;
     const description = data.description ?? DEFAULT_DESCRIPTION;
     const url = new URL(snapshot.url, environment.siteUrl);

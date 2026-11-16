@@ -94,6 +94,10 @@ svg path {
   grid-template-columns: 6.25rem minmax(0, 1fr);
   align-items: center;
   gap: 1rem;
+  // The car's size, shared with the room reserved for it under the summary.
+  --car-width: clamp(6rem, 30vw, 8.25rem);
+  --car-height: calc(var(--car-width) * 84 / 162);
+
   padding: 0.9rem 1rem;
   overflow: hidden;
   border-radius: 1.25rem;
@@ -105,7 +109,8 @@ svg path {
   position: relative;
   z-index: 1;
   min-width: 0;
-  padding-bottom: 1.6rem;
+  // Keeps the text clear of the car, which sits wholly inside the panel beneath it.
+  padding-bottom: calc(var(--car-height) - 0.35rem);
 }
 
 .widget__eyebrow {
@@ -143,9 +148,9 @@ svg path {
 
 .widget__car {
   position: absolute;
-  right: -1.1rem;
-  bottom: -0.5rem;
-  width: 7.4rem;
+  right: 0.75rem;
+  bottom: 0.6rem;
+  width: var(--car-width);
   height: auto;
   filter: drop-shadow(0 6px 6px rgb(0 0 0 / 35%));
   pointer-events: none;
@@ -308,22 +313,28 @@ svg path {
 
 .widget__cta {
   min-height: 3.5rem;
-  border: 0;
+  // Outlined at rest; it only fills with dark green while it is being pressed.
+  border: 2px solid #1b4f43;
   border-radius: 999px;
-  background: #1b4f43;
-  color: #fff;
+  background: #fff;
+  color: #1b4f43;
   font-size: 1.0625rem;
   font-weight: 700;
   transition:
     background-color 160ms ease,
+    color 160ms ease,
     transform 160ms ease;
 
   &:active:enabled {
+    background: #1b4f43;
+    color: #fff;
     transform: scale(0.98);
   }
 
   &:disabled {
-    background: #9aa69f;
+    border-color: #9aa69f;
+    background: transparent;
+    color: #6b7670;
   }
 }
 

@@ -13,6 +13,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../core/auth/google-identity.service';
 import { httpErrorMessage } from '../../core/http-error-message';
+import { AFTER_LOGIN_URL, isUnavailable } from '../../core/navigation';
 import { FieldErrors } from '../../shared/field-errors/field-errors';
 import { GoogleSignInButton } from '../../shared/google-sign-in-button/google-sign-in-button';
 
@@ -37,6 +38,10 @@ export class Login {
   private readonly router = inject(Router);
   protected readonly googleConfigured = inject(GoogleIdentityService).isConfigured;
   protected readonly showGoogleSetupHint = !this.googleConfigured && isDevMode();
+
+  /** The legal pages are linked only once they have content. */
+  protected readonly termsReady = !isUnavailable('/terms');
+  protected readonly privacyReady = !isUnavailable('/privacy');
 
   protected readonly mode = signal<Mode>('signin');
   protected readonly serverError = signal<string | null>(null);
@@ -110,9 +115,12 @@ export class Login {
 
   private continue(): Promise<boolean> {
     const returnUrl = this.returnUrl();
-    // Only follow in-app paths, never protocol-relative or absolute URLs
+    // Only follow in-app paths, never protocol-relative or absolute URLs, and never a
+    // page that has no content yet: those fall back to the booking table.
     const target =
-      returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/schedule';
+      returnUrl?.startsWith('/') && !returnUrl.startsWith('//') && !isUnavailable(returnUrl)
+        ? returnUrl
+        : AFTER_LOGIN_URL;
     return this.router.navigateByUrl(target);
   }
 }

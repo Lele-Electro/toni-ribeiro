@@ -9,18 +9,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { BookingPlace } from '../../core/lift-bookings/lift-bookings.service';
-import {
-  GooglePlacesService,
-  PlaceSuggestion,
-  PlacesSession,
-} from '../../core/maps/google-places.service';
+import { AddressSearchService, PlaceSuggestion } from '../../core/maps/address-search.service';
 
-const DEBOUNCE_MS = 250;
+/** Keeps request volume low: Photon's public server is free under fair use. */
+const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 3;
 
 /**
- * An address field with Google Places suggestions (an ARIA combobox). Whatever the member
- * types is itself a valid address, so the field keeps working without Google Maps.
+ * An address field with OpenStreetMap suggestions from Photon (an ARIA combobox). Whatever
+ * the member types is itself a valid address, so the field keeps working without them.
  */
 @Component({
   selector: 'app-place-autocomplete',
@@ -36,40 +33,29 @@ export class PlaceAutocomplete {
   /** IDs of the hint and error elements that describe this field. */
   readonly describedBy = input('');
 
-  protected readonly places = inject(GooglePlacesService);
+  protected readonly places = inject(AddressSearchService);
   protected readonly suggestions = signal<PlaceSuggestion[]>([]);
   protected readonly open = signal(false);
   protected readonly activeIndex = signal(-1);
-  protected readonly searching = signal(false);
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
-  private session: PlacesSession | null = null;
   private timer?: ReturnType<typeof setTimeout>;
-  private requestId = 0;
+  private lookup?: AbortController;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => {
-      clearTimeout(this.timer);
-      this.requestId++;
-    });
+    inject(DestroyRef).onDestroy(() => this.cancelLookup());
   }
 
   focus(): void {
     this.field().nativeElement.focus();
   }
 
-  /** Maps loads the first time an address field is focused, not with the page. */
-  protected warmUp(): void {
-    void this.places.ready();
-  }
-
   protected onInput(event: Event): void {
     const address = (event.target as HTMLInputElement).value;
-    // Edited text no longer matches the chosen place, so drop its ID and coordinates.
+    // Edited text no longer matches the chosen place, so drop its coordinates.
     this.place.set({ address });
-    clearTimeout(this.timer);
+    this.cancelLookup();
     const query = address.trim();
     if (query.length < MIN_QUERY_LENGTH) {
-      this.requestId++;
       this.close();
       return;
     }
@@ -77,34 +63,18 @@ export class PlaceAutocomplete {
   }
 
   private async search(query: string): Promise<void> {
-    const request = ++this.requestId;
-    this.searching.set(true);
-    try {
-      this.session ??= await this.places.newSession();
-      if (!this.session) return;
-      const suggestions = await this.places.suggest(query, this.session);
-      if (request !== this.requestId) return;
-      this.suggestions.set(suggestions);
-      this.activeIndex.set(-1);
-      this.open.set(suggestions.length > 0);
-    } finally {
-      if (request === this.requestId) this.searching.set(false);
-    }
+    const lookup = (this.lookup = new AbortController());
+    const suggestions = await this.places.suggest(query, lookup.signal);
+    if (lookup.signal.aborted) return;
+    this.suggestions.set(suggestions);
+    this.activeIndex.set(-1);
+    this.open.set(suggestions.length > 0);
   }
 
-  protected async choose(suggestion: PlaceSuggestion): Promise<void> {
-    this.requestId++;
-    clearTimeout(this.timer);
+  protected choose(suggestion: PlaceSuggestion): void {
+    this.cancelLookup();
     this.close();
-    // Show the chosen text immediately; the formatted address and coordinates follow.
-    this.place.set({
-      address: [suggestion.primary, suggestion.secondary].filter(Boolean).join(', '),
-      placeId: suggestion.id,
-    });
-    const request = this.requestId;
-    this.session = null; // Place Details ends the session; typing again starts a new one.
-    const place = await this.places.resolve(suggestion);
-    if (request === this.requestId) this.place.set(place);
+    this.place.set(suggestion.place);
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -118,7 +88,7 @@ export class PlaceAutocomplete {
       );
     } else if (event.key === 'Enter' && this.activeIndex() >= 0) {
       event.preventDefault();
-      void this.choose(this.suggestions()[this.activeIndex()]);
+      this.choose(this.suggestions()[this.activeIndex()]);
     } else if (event.key === 'Escape') {
       // Close the list only; a second Escape closes the booking dialog.
       event.preventDefault();
@@ -131,5 +101,11 @@ export class PlaceAutocomplete {
     this.open.set(false);
     this.suggestions.set([]);
     this.activeIndex.set(-1);
+  }
+
+  /** Stops the pending debounce and any request whose answer is no longer wanted. */
+  private cancelLookup(): void {
+    clearTimeout(this.timer);
+    this.lookup?.abort();
   }
 }

@@ -36,6 +36,8 @@
         [class.is-active]="activeSection() === 'other'"
         [attr.aria-expanded]="menuOpen()"
         aria-controls="other-navigation"
+        [disabled]="otherDisabled"
+        [attr.title]="otherDisabled ? 'Coming soon' : null"
         (click)="toggleMenu()"
       >
         Other
@@ -46,40 +48,36 @@
         [hidden]="!menuOpen()"
         aria-label="Other pages"
       >
-        <li>
-          <a
-            routerLink="/referral-business"
-            routerLinkActive="is-active"
-            ariaCurrentWhenActive="page"
-            >Referral Business</a
-          >
-        </li>
-        <li>
-          <a routerLink="/schedule" routerLinkActive="is-active" ariaCurrentWhenActive="page"
-            >My Schedule</a
-          >
-        </li>
-        <li>
-          <a routerLink="/privacy" routerLinkActive="is-active" ariaCurrentWhenActive="page"
-            >Privacy Policy</a
-          >
-        </li>
-        <li>
-          <a routerLink="/terms" routerLinkActive="is-active" ariaCurrentWhenActive="page"
-            >Terms of Service</a
-          >
-        </li>
+        @for (item of otherItems; track item.path) {
+          <li>
+            @if (item.disabled) {
+              <span class="is-disabled" aria-disabled="true" title="Coming soon">{{
+                item.label
+              }}</span>
+            } @else {
+              <a [routerLink]="item.path" routerLinkActive="is-active" ariaCurrentWhenActive="page">{{
+                item.label
+              }}</a>
+            }
+          </li>
+        }
       </ul>
     </li>
     <li>
-      <a
-        class="navbar__link"
-        routerLink="/schedule"
-        [queryParams]="{ service: 'general' }"
-        [class.is-active]="activeSection() === 'contact'"
-        [attr.aria-current]="activeSection() === 'contact' ? 'page' : null"
-        >Contact</a
-      >
+      @if (contactDisabled) {
+        <span class="navbar__link is-disabled" aria-disabled="true" title="Coming soon"
+          >Contact</span
+        >
+      } @else {
+        <a
+          class="navbar__link"
+          routerLink="/schedule"
+          [queryParams]="{ service: 'general' }"
+          [class.is-active]="activeSection() === 'contact'"
+          [attr.aria-current]="activeSection() === 'contact' ? 'page' : null"
+          >Contact</a
+        >
+      }
     </li>
     <li class="navbar__account">
       @if (hydrated() && auth.isAuthenticated()) {

@@ -56,6 +56,18 @@
   font-weight: 800;
 }
 
+// Destinations whose pages are not ready yet: visible, but clearly not clickable.
+.navbar__link:disabled,
+.navbar__link.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+
+  &:hover {
+    background: transparent;
+    color: inherit;
+  }
+}
+
 .navbar__other {
   position: relative;
 }
@@ -82,7 +94,8 @@
   list-style: none;
 
   a,
-  button {
+  button,
+  span {
     display: block;
     width: 100%;
     min-height: 2.75rem;
@@ -104,6 +117,15 @@
 
     &.is-active {
       font-weight: 800;
+    }
+
+    &.is-disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+
+      &:hover {
+        background: transparent;
+      }
     }
   }
 }
@@ -142,7 +164,8 @@
     backdrop-filter: blur(22px);
 
     a,
-    button {
+    button,
+    span {
       color: #193d33;
 
       &:hover {

@@ -1,4 +1,4 @@
-:host {
+﻿:host {
   display: block;
 }
 
@@ -10,11 +10,14 @@
 
   position: relative;
   container-type: size;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  // The heading sits directly on top of the table, and the pair is centred in the room
+  // under the header.
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   height: 100vh;
   height: 100dvh;
-  min-height: 34rem;
+  min-height: 22rem;
   margin-top: calc(-1 * var(--header));
   padding-top: var(--header);
   overflow: hidden;
@@ -24,8 +27,9 @@
 .schedule-heading {
   position: relative;
   z-index: 1;
+  flex: none;
   margin: 0;
-  padding: clamp(0.25rem, 1dvh, 0.75rem) 0 clamp(0.5rem, 1.6dvh, 1rem) 5vw;
+  padding: 0 0 clamp(0.5rem, 1.6dvh, 1rem) 5vw;
   color: #1b4f43;
   font-family: Impact, 'Arial Narrow', sans-serif;
   font-size: clamp(1.9rem, 2.9vw, 2.9rem);
@@ -38,7 +42,14 @@
 .schedule-picker {
   position: relative;
   z-index: 1;
-  margin: 0 14vw clamp(1rem, 3dvh, 2rem) 5vw;
+  // 30% narrower than the 81vw it once filled, but never too narrow to read.
+  width: max(56.7vw, min(40rem, 90vw));
+  // 73% of the room under the header. It may shrink (never grow), so the heading and the
+  // whole table stay on screen at every window height; the slot list scrolls inside.
+  flex: 0 1 auto;
+  height: 73%;
+  min-height: 0;
+  margin: 0 0 0 5vw;
 }
 
 .schedule-media {
@@ -64,12 +75,16 @@
 @media (max-width: 40rem) {
   .schedule-page {
     container-type: normal;
-    display: block;
+    // A column, so the booking widget can sit at the bottom of the screen.
+    display: flex;
+    flex-direction: column;
     height: auto;
     min-height: 100vh;
     min-height: 100dvh;
     margin-top: 0;
-    padding: 4.75rem 1rem 1.5rem;
+    justify-content: flex-end;
+    // 60px stays clear beneath the widget, plus any home-indicator inset.
+    padding: 4.75rem 1rem calc(3.75rem + env(safe-area-inset-bottom, 0px));
     overflow: visible;
     // Shows through the video as it dims, keeping white text and the widget legible.
     background: #0b1c16;
@@ -97,8 +112,16 @@
     text-shadow: 0 2px 14px rgb(0 0 0 / 55%);
   }
 
+  // The heading and the widget sit together at the bottom; the video shows above them.
   .schedule-picker {
+    flex: none;
+    width: auto;
+    height: auto;
     margin: 0;
+  }
+
+  .schedule-heading,
+  .schedule-picker {
     animation: widget-in 900ms 3s var(--ease-out) both;
   }
 
@@ -109,6 +132,7 @@
       opacity: 0.7;
     }
 
+    .schedule-heading,
     .schedule-picker {
       animation: widget-in-now 260ms var(--ease-out) both;
     }
@@ -141,7 +165,9 @@
     opacity: 0.7;
   }
 
+  .schedule-heading,
   .schedule-picker,
+  .intro-skip .schedule-heading,
   .intro-skip .schedule-picker {
     animation: none;
   }

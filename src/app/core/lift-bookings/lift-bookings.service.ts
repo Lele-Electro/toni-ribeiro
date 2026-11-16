@@ -4,11 +4,12 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 /**
- * A pickup or drop-off point. The address is always present; the Google Place ID and
- * coordinates exist only when the member picked a Places suggestion.
+ * A pickup or drop-off point. The address is always present; the coordinates exist only
+ * when the member picked an address suggestion.
  */
 export interface BookingPlace {
   address: string;
+  /** A Google Place ID, on bookings made while Google Places supplied the suggestions. */
   placeId?: string;
   lat?: number;
   lng?: number;

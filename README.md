@@ -44,9 +44,8 @@ The API lives in the digiterra backend (`C:\development\digiterra-challenge`), u
 
 2. Start this app with `ng serve` and open `http://localhost:4200/`.
 
-3. Optional: for pickup and drop-off address search, copy `.env.example` to `.env` and set
-   `GOOGLE_MAPS_API_KEY` to a restricted browser key. Without it the booking form accepts
-   typed addresses. In production, set the same variable in the Node host's environment.
+Pickup and drop-off address search uses Photon (OpenStreetMap), which needs no key or
+setup. If Photon cannot be reached, the booking form accepts typed addresses.
 
 `src/environments/environment.development.ts` points at `http://localhost:3000/api/ribeiro`.
 Production values (`siteUrl`, `apiUrl`, `googleClientId`) are in `src/environments/environment.ts`.

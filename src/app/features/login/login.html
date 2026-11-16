@@ -121,8 +121,19 @@
       </form>
 
       <p class="auth__legal">
-        By continuing you agree to our <a routerLink="/terms">Terms of Service</a> and
-        <a routerLink="/privacy">Privacy Policy</a>.
+        By continuing you agree to our
+        @if (termsReady) {
+          <a routerLink="/terms">Terms of Service</a>
+        } @else {
+          Terms of Service
+        }
+        and
+        @if (privacyReady) {
+          <a routerLink="/privacy">Privacy Policy</a
+          >.
+        } @else {
+          Privacy Policy.
+        }
       </p>
     </div>
   </div>

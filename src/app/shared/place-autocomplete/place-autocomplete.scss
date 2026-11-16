@@ -94,6 +94,15 @@
   font-size: 0.75rem;
 }
 
+// Phones: matches the booking dialog's compact fields.
+@media (max-width: 40rem) {
+  .place__input {
+    min-height: 2.75rem;
+    padding-block: 0.4rem;
+    font-size: 1rem; // Prevents iOS zooming into the field.
+  }
+}
+
 @keyframes place-list {
   from {
     opacity: 0;

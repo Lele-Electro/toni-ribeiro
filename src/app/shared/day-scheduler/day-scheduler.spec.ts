@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { LiftBooking, LiftBookingsService } from '../../core/lift-bookings/lift-bookings.service';
-import { GooglePlacesService } from '../../core/maps/google-places.service';
+import { AddressSearchService } from '../../core/maps/address-search.service';
 import { DayScheduler } from './day-scheduler';
 import { scheduleDays, slotInstant } from './scheduler-time';
 
@@ -57,13 +57,9 @@ describe('DayScheduler', () => {
         { provide: LiftBookingsService, useValue: api },
         { provide: AuthService, useValue: { isAuthenticated: authenticated, user } },
         {
-          // Maps is unavailable in tests: the form must work with typed addresses.
-          provide: GooglePlacesService,
-          useValue: {
-            unavailable: signal(true),
-            ready: async () => false,
-            newSession: async () => null,
-          },
+          // Address search is unavailable in tests: the form must work with typed addresses.
+          provide: AddressSearchService,
+          useValue: { unavailable: signal(true), suggest: async () => [] },
         },
       ],
     });

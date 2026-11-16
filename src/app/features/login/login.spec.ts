@@ -41,13 +41,22 @@ describe('Login', () => {
   };
 
   it('signs in and returns to the page the user came from', async () => {
-    fixture.componentRef.setInput('returnUrl', '/schedule?service=lift-club');
+    fixture.componentRef.setInput('returnUrl', '/lift-club?from=email');
     type('#email', 'ann@example.com');
     type('#password', 'secret-123');
     await submit();
 
     expect(auth.signIn).toHaveBeenCalledWith({ email: 'ann@example.com', password: 'secret-123' });
-    expect(navigateByUrl).toHaveBeenCalledWith('/schedule?service=lift-club');
+    expect(navigateByUrl).toHaveBeenCalledWith('/lift-club?from=email');
+  });
+
+  it('goes to the booking table instead of a page that has no content yet', async () => {
+    fixture.componentRef.setInput('returnUrl', '/schedule?service=lift-club');
+    type('#email', 'ann@example.com');
+    type('#password', 'secret-123');
+    await submit();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/lift-club');
   });
 
   it('ignores return URLs that point off-site', async () => {
@@ -56,7 +65,7 @@ describe('Login', () => {
     type('#password', 'secret-123');
     await submit();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/schedule');
+    expect(navigateByUrl).toHaveBeenCalledWith('/lift-club');
   });
 
   it('does not submit an invalid form and shows why', async () => {
@@ -108,7 +117,7 @@ describe('Login', () => {
   it('signs in with a Google credential', async () => {
     await fixture.componentInstance['onGoogleCredential']('google-id-token');
     expect(auth.signInWithGoogle).toHaveBeenCalledWith('google-id-token');
-    expect(navigateByUrl).toHaveBeenCalledWith('/schedule');
+    expect(navigateByUrl).toHaveBeenCalledWith('/lift-club');
   });
 
   it('accepts an optional cellphone number during registration and rejects invalid input', async () => {

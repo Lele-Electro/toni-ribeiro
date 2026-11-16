@@ -32,7 +32,7 @@ describe('Navbar', () => {
   const toggle = () => element.querySelector<HTMLButtonElement>('.navbar__other > button')!;
   const dropdown = () => element.querySelector<HTMLUListElement>('.navbar__dropdown')!;
 
-  it('uses the requested headings and the existing general-enquiry flow', () => {
+  it('uses the requested headings and disables Contact until its page is ready', () => {
     const links = [...element.querySelectorAll<HTMLElement>('.navbar__link')];
     expect(links.map((link) => link.textContent?.trim())).toEqual([
       'Home',
@@ -41,7 +41,8 @@ describe('Navbar', () => {
       'Contact',
       'Log in',
     ]);
-    expect(links[3].getAttribute('href')).toBe('/schedule?service=general');
+    expect(links[3].getAttribute('href')).toBeNull();
+    expect(links[3].getAttribute('aria-disabled')).toBe('true');
     expect(element.querySelector('.navbar__link[aria-current="page"]')?.textContent?.trim()).toBe(
       'Home',
     );
@@ -50,7 +51,6 @@ describe('Navbar', () => {
 
   it.each([
     ['/lift-club', 'Private Lift Club'],
-    ['/schedule?service=general', 'Contact'],
     ['/referral-business', 'Other'],
     ['/login?returnUrl=%2Fschedule', 'Log in'],
     ['/forgot-password', 'Log in'],
@@ -68,38 +68,22 @@ describe('Navbar', () => {
     expect(selected[0].textContent?.trim()).toBe(heading);
   });
 
-  it('opens Other and closes it on Escape, outside click, and navigation', async () => {
+  // Every page under Other is listed in UNAVAILABLE_PATHS for now, so the menu can't open.
+  it('disables Other while none of its pages are ready', async () => {
+    expect(toggle().disabled).toBe(true);
     toggle().click();
     await fixture.whenStable();
-    expect(dropdown().hidden).toBe(false);
-    expect(toggle().getAttribute('aria-expanded')).toBe('true');
-
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await fixture.whenStable();
     expect(dropdown().hidden).toBe(true);
-    expect(document.activeElement).toBe(toggle());
-
-    toggle().click();
-    await fixture.whenStable();
-    document.body.click();
-    await fixture.whenStable();
-    expect(dropdown().hidden).toBe(true);
-
-    toggle().click();
-    await fixture.whenStable();
-    element.querySelector<HTMLAnchorElement>('a[href="/referral-business"]')!.click();
-    await fixture.whenStable();
-    expect(router.url).toBe('/referral-business');
-    expect(dropdown().hidden).toBe(true);
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
   });
 
   it('keeps account controls visible outside Other and switches to logout', async () => {
-    expect([...dropdown().querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual([
-      '/referral-business',
-      '/schedule',
-      '/privacy',
-      '/terms',
-    ]);
+    expect(dropdown().querySelectorAll('a')).toHaveLength(0);
+    expect(
+      [...dropdown().querySelectorAll('[aria-disabled="true"]')].map((item) =>
+        item.textContent?.trim(),
+      ),
+    ).toEqual(['Referral Business', 'My Schedule', 'Privacy Policy', 'Terms of Service']);
     expect(element.querySelector('.navbar__account a')?.getAttribute('href')).toBe('/login');
     auth.isAuthenticated.set(true);
     await fixture.whenStable();

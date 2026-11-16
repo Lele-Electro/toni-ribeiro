@@ -19,7 +19,7 @@ export class App {
     return url.root.children[PRIMARY_OUTLET]?.segments.map((segment) => segment.path) ?? [];
   });
   protected readonly showNavbar = computed(() => this.route().length > 0);
-  /** The lift club page keeps its whole schedule in view, so its header is slimmer. */
+  /** The lift club page keeps its whole schedule in view, so its header sits higher. */
   protected readonly compactHeader = computed(() => this.route()[0] === 'lift-club');
 
   constructor() {

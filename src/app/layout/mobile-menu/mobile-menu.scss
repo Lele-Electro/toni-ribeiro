@@ -191,6 +191,23 @@
       background: #fff;
     }
   }
+
+  // Pages that are not ready yet.
+  &.is-disabled {
+    justify-content: space-between;
+    color: rgb(255 255 255 / 45%);
+    cursor: not-allowed;
+  }
+}
+
+.overlay__soon {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .overlay__auth {

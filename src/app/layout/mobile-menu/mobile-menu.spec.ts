@@ -67,16 +67,20 @@ describe('MobileMenu', () => {
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
     expect(trigger().classList.contains('burger--open')).toBe(true);
     expect(document.documentElement.classList.contains('nav-open')).toBe(true);
-    const links = [...dialog().querySelectorAll<HTMLAnchorElement>('.overlay__link')];
-    expect(links.map((link) => [link.textContent!.trim(), link.getAttribute('href')])).toEqual([
+    // Pages without content yet are listed with a "Soon" tag instead of a link.
+    const links = [...dialog().querySelectorAll<HTMLElement>('.overlay__link')];
+    expect(
+      links.map((link) => [link.firstChild!.textContent!.trim(), link.getAttribute('href')]),
+    ).toEqual([
       ['Home', '/'],
       ['Private Lift Club', '/lift-club'],
-      ['Referral Business', '/referral-business'],
-      ['My Schedule', '/schedule'],
-      ['Contact', '/schedule?service=general'],
-      ['Privacy Policy', '/privacy'],
-      ['Terms of Service', '/terms'],
+      ['Referral Business', null],
+      ['My Schedule', null],
+      ['Contact', null],
+      ['Privacy Policy', null],
+      ['Terms of Service', null],
     ]);
+    expect(dialog().querySelectorAll('.overlay__link.is-disabled')).toHaveLength(5);
     expect(dialog().querySelector('.overlay__auth')!.getAttribute('href')).toBe('/login');
     expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe('Home');
   });
@@ -102,11 +106,13 @@ describe('MobileMenu', () => {
 
   it('closes after navigating and marks the current page', async () => {
     await open();
-    dialog().querySelector<HTMLAnchorElement>('a[href="/schedule?service=general"]')!.click();
+    dialog().querySelector<HTMLAnchorElement>('a[href="/lift-club"]')!.click();
     await settle();
-    expect(router.url).toBe('/schedule?service=general');
+    expect(router.url).toBe('/lift-club');
     expect(dialog().hasAttribute('open')).toBe(false);
-    expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe('Contact');
+    expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe(
+      'Private Lift Club',
+    );
   });
 
   it('offers Log out to signed-in members', async () => {
