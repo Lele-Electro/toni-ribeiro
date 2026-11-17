@@ -6,6 +6,8 @@ export interface UserInformation {
   phone?: string | null;
   picture: string | null;
   authProviders: ('password' | 'google')[];
+  /** Toni's own account: may see and remove every booking. The API enforces it. */
+  isAdmin?: boolean;
 }
 
 /** Response body of /user/signup, /user/signin and /user/google. */

@@ -8,29 +8,33 @@ export const serverRoutes: ServerRoute[] = [
     path: 'schedule',
     renderMode: RenderMode.Client,
   },
+  { path: 'admin', renderMode: RenderMode.Client },
+  // These pages are the same for everyone, so they are rendered once at build time. That
+  // also gives the static upload (npm run build:afrihost) real HTML for search engines.
   {
     path: '',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Prerender,
   },
   {
+    // Shows today's dates and live availability: never built ahead of time.
     path: 'lift-club',
     renderMode: RenderMode.Server,
   },
   {
     path: 'referral-business',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Prerender,
   },
   {
     path: 'login',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Prerender,
   },
   {
     path: 'privacy',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Prerender,
   },
   {
     path: 'terms',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Prerender,
   },
   {
     path: '**',

@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
   /** Public origin of this site, used for canonical URLs and social tags. */
-  siteUrl: 'https://www.toniribeiro.com',
+  siteUrl: 'https://toniribeiro.co.za',
   /** Base URL of the Ribeiro routes on the digiterra backend. */
   apiUrl: 'https://digiterra-backend.toni101ribeiro.workers.dev/api/ribeiro',
   /** OAuth 2.0 Web client ID from Google Cloud Console. Leave empty to hide Google sign-in. */

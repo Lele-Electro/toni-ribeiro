@@ -43,14 +43,23 @@ export class Navbar {
   protected readonly auth = inject(AuthService);
   protected readonly menuOpen = signal(false);
   /** Pages under "Other"; those without content yet are shown but can't be opened. */
-  protected readonly otherItems = [
+  private readonly pages = [
     { label: 'Referral Business', path: '/referral-business' },
     { label: 'My Schedule', path: '/schedule' },
     { label: 'Privacy Policy', path: '/privacy' },
     { label: 'Terms of Service', path: '/terms' },
   ].map((item) => ({ ...item, disabled: isUnavailable(item.path) }));
+  /** The owner's account also gets the booking-management page. */
+  protected readonly isAdmin = computed(
+    () => this.hydrated() && this.auth.isAuthenticated() && this.auth.user()?.isAdmin === true,
+  );
+  protected readonly otherItems = computed(() =>
+    this.isAdmin()
+      ? [{ label: 'Manage bookings', path: '/admin', disabled: false }, ...this.pages]
+      : this.pages,
+  );
   /** With nothing to open under it, the "Other" button itself is disabled. */
-  protected readonly otherDisabled = this.otherItems.every((item) => item.disabled);
+  protected readonly otherDisabled = computed(() => this.otherItems().every((item) => item.disabled));
   protected readonly contactDisabled = isUnavailable('/schedule');
   protected readonly activeSection = computed(() => {
     const url = this.router.parseUrl(this.currentUrl());

@@ -1,0 +1,201 @@
+<section class="section section--tight">
+  <div class="container admin">
+    <header class="admin__intro">
+      <span class="eyebrow">Owner tools</span>
+      <h1>Manage bookings</h1>
+      <p class="lead">
+        Remove a booking to free its slot, or delete an account with everything stored against
+        it. Nothing here can be undone, and members are not emailed about it.
+      </p>
+    </header>
+
+    @if (notice(); as message) {
+      <p class="alert alert--success" role="status">{{ message }}</p>
+    }
+    @if (actionError(); as message) {
+      <p class="alert alert--error" role="alert">{{ message }}</p>
+    }
+
+    @if (loadError(); as message) {
+      <p class="alert alert--error" role="alert">
+        {{ message }}
+        <button type="button" class="admin__retry" (click)="load()">Try again</button>
+      </p>
+    } @else if (!overview()) {
+      <p class="admin__empty">Loading…</p>
+    } @else {
+      <section class="card admin__card" aria-labelledby="admin-bookings">
+        <h2 id="admin-bookings">Upcoming bookings ({{ bookings().length }})</h2>
+        @if (bookings().length) {
+          <ul class="admin__list">
+            @for (booking of bookings(); track booking._id) {
+              <li class="admin__row">
+                <div class="admin__when">
+                  <strong>{{ day(booking) }}</strong>
+                  <span>{{ time(booking) }}</span>
+                </div>
+                <div class="admin__what">
+                  <p class="admin__who">
+                    {{ booking.member?.name || 'Deleted account' }}
+                    @if (booking.member; as member) {
+                      <span class="admin__muted">{{ member.email }}</span>
+                    }
+                  </p>
+                  <p class="admin__muted">
+                    {{ booking.pickup?.address || 'No pickup' }} →
+                    {{ booking.dropoff?.address || 'No drop-off' }}
+                  </p>
+                  <p class="admin__muted">
+                    {{ booking.passengers }} {{ booking.passengers === 1 ? 'traveller' : 'travellers' }}
+                    @if (booking.whatsapp) {
+                      · WhatsApp {{ booking.whatsapp }}
+                    }
+                    · {{ booking.status === 'confirmed' ? 'Confirmation sent' : 'Confirmation pending' }}
+                  </p>
+                </div>
+                <div class="admin__actions">
+                  @if (confirming() === 'booking:' + booking._id) {
+                    <span class="admin__question">Remove this booking?</span>
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      [disabled]="busy()"
+                      (click)="removeBooking(booking)"
+                    >
+                      Yes, remove
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--sm"
+                      [disabled]="busy()"
+                      (click)="confirming.set(null)"
+                    >
+                      Keep
+                    </button>
+                  } @else if (confirming() === 'booking-account:' + booking._id && booking.member) {
+                    <span class="admin__question">Delete {{ booking.member.email }} entirely?</span>
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      [disabled]="busy()"
+                      (click)="deleteAccount(booking.member.userId, booking.member.email)"
+                    >
+                      Yes, delete
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--sm"
+                      [disabled]="busy()"
+                      (click)="confirming.set(null)"
+                    >
+                      Keep
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--sm"
+                      (click)="ask('booking:' + booking._id)"
+                    >
+                      Remove booking
+                    </button>
+                    @if (booking.member && !isAdminMember(booking)) {
+                      <button
+                        type="button"
+                        class="btn btn--danger btn--sm"
+                        (click)="ask('booking-account:' + booking._id)"
+                      >
+                        Delete account
+                      </button>
+                    }
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="admin__empty">No bookings from today onwards. Every slot is open.</p>
+        }
+      </section>
+
+      <section class="card admin__card" aria-labelledby="admin-accounts">
+        <h2 id="admin-accounts">Accounts ({{ accounts().length }})</h2>
+        <ul class="admin__list">
+          @for (account of accounts(); track account.userId) {
+            <li class="admin__row">
+              <div class="admin__what">
+                <p class="admin__who">
+                  {{ account.name }}
+                  <span class="admin__muted">{{ account.email }}</span>
+                </p>
+                <p class="admin__muted">
+                  Joined {{ joined(account) }} · {{ account.bookings }}
+                  {{ account.bookings === 1 ? 'upcoming booking' : 'upcoming bookings' }}
+                </p>
+              </div>
+              <div class="admin__actions">
+                @if (account.isAdmin) {
+                  <span class="admin__badge">Owner</span>
+                } @else if (confirming() === 'account:' + account.userId) {
+                  <span class="admin__question">Delete this account and its bookings?</span>
+                  <button
+                    type="button"
+                    class="btn btn--danger btn--sm"
+                    [disabled]="busy()"
+                    (click)="deleteAccount(account.userId, account.email)"
+                  >
+                    Yes, delete
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    [disabled]="busy()"
+                    (click)="confirming.set(null)"
+                  >
+                    Keep
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn--danger btn--sm"
+                    (click)="ask('account:' + account.userId)"
+                  >
+                    Delete account
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="card admin__card admin__reset" aria-labelledby="admin-reset">
+        <h2 id="admin-reset">Reset everything</h2>
+        <p>
+          Deletes all {{ memberCount() }} member
+          {{ memberCount() === 1 ? 'account' : 'accounts' }} and every booking, including your
+          own bookings. Your owner account stays so that you can still log in.
+        </p>
+        @if (confirming() === 'reset') {
+          <p class="admin__question">This cannot be undone. Delete everything?</p>
+          <div class="admin__actions admin__actions--start">
+            <button type="button" class="btn btn--danger" [disabled]="busy()" (click)="reset()">
+              {{ busy() ? 'Resetting…' : 'Yes, reset everything' }}
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost"
+              [disabled]="busy()"
+              (click)="confirming.set(null)"
+            >
+              Cancel
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="btn btn--danger" (click)="ask('reset')">
+            Reset accounts and bookings
+          </button>
+        }
+      </section>
+    }
+  </div>
+</section>

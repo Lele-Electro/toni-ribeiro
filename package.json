@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:afrihost": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-afrihost.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:toni-ribeiro": "node dist/toni-ribeiro/server/server.mjs"

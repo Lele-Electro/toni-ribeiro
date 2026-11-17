@@ -40,6 +40,8 @@ const CLOSE_MS = 220;
 export class MobileMenu {
   readonly appearance = input<'solid' | 'frosted'>('solid');
   readonly authenticated = input(false);
+  /** Signed in with the owner's account. */
+  readonly admin = input(false);
   readonly logout = output<void>();
 
   private readonly router = inject(Router);
@@ -53,7 +55,7 @@ export class MobileMenu {
   protected readonly phase = signal<'closed' | 'open' | 'closing'>('closed');
 
   /** Every destination of the desktop navbar, including those under its "Other" menu. */
-  protected readonly items: MenuItem[] = (
+  private readonly pages: MenuItem[] = (
     [
       { key: 'home', label: 'Home', path: '/' },
       { key: 'lift-club', label: 'Private Lift Club', path: '/lift-club' },
@@ -64,6 +66,16 @@ export class MobileMenu {
       { key: 'terms', label: 'Terms of Service', path: '/terms' },
     ] satisfies MenuItem[]
   ).map((item) => ({ ...item, disabled: isUnavailable(item.path) }));
+  /** The owner's account also gets the booking-management page, after the lift club. */
+  protected readonly items = computed<MenuItem[]>(() =>
+    this.admin()
+      ? [
+          ...this.pages.slice(0, 2),
+          { key: 'admin', label: 'Manage bookings', path: '/admin' },
+          ...this.pages.slice(2),
+        ]
+      : this.pages,
+  );
 
   protected readonly activeKey = computed(() => {
     const url = this.router.parseUrl(this.currentUrl());

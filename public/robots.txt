@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /schedule
 
-Sitemap: https://www.toniribeiro.com/sitemap.xml
+Sitemap: https://toniribeiro.co.za/sitemap.xml

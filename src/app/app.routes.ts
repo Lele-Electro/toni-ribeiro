@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/auth/auth.guards';
+import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
+import { LIFT_CLUB_PAGE } from './core/seo/page-tags';
 import { SeoRouteData } from './core/seo/seo-title.strategy';
 
 export const routes: Routes = [
@@ -9,12 +10,9 @@ export const routes: Routes = [
     loadComponent: () => import('./features/landing/landing').then((m) => m.Landing),
   },
   {
-    path: 'lift-club',
-    title: 'Private Lift Club',
-    data: {
-      description:
-        'Join a private lift club with vetted drivers, fixed routes and booked seats. Share the commute, split the cost and travel with people you know.',
-    } satisfies SeoRouteData,
+    path: LIFT_CLUB_PAGE.path,
+    title: LIFT_CLUB_PAGE.title,
+    data: { description: LIFT_CLUB_PAGE.description } satisfies SeoRouteData,
     loadComponent: () => import('./features/lift-club/lift-club').then((m) => m.LiftClub),
   },
   {
@@ -60,6 +58,15 @@ export const routes: Routes = [
     data: { robots: 'noindex, nofollow' } satisfies SeoRouteData,
     loadComponent: () =>
       import('./features/date-time-form/date-time-form').then((m) => m.DateTimeForm),
+  },
+  {
+    path: 'admin',
+    title: 'Manage bookings',
+    canActivate: [adminGuard],
+    // Lets AuthService.expireSession() re-run the guard on the page the owner is on
+    runGuardsAndResolvers: 'always',
+    data: { robots: 'noindex, nofollow' } satisfies SeoRouteData,
+    loadComponent: () => import('./features/admin/admin').then((m) => m.Admin),
   },
   {
     path: 'privacy',

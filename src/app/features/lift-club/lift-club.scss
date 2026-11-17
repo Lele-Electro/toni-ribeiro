@@ -39,6 +39,24 @@
   text-wrap: nowrap;
 }
 
+.schedule-tagline {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  // Stays on the white side, clear of the slanted video (which starts at 49.4%).
+  max-width: min(34rem, 40vw);
+  margin: 0 0 clamp(0.75rem, 2.2dvh, 1.25rem) 5vw;
+  color: #3e5c52;
+  font-size: clamp(0.95rem, 1.05vw, 1.0625rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+
+  strong {
+    color: #1b4f43;
+    font-weight: 800;
+  }
+}
+
 .schedule-picker {
   position: relative;
   z-index: 1;
@@ -106,13 +124,27 @@
   }
 
   .schedule-heading {
-    padding: 0 0 0.75rem 0.25rem;
+    padding: 0 0 0.5rem 0.25rem;
     color: #fff;
     font-size: 2rem;
     text-shadow: 0 2px 14px rgb(0 0 0 / 55%);
   }
 
-  // The heading and the widget sit together at the bottom; the video shows above them.
+  .schedule-tagline {
+    max-width: 30rem;
+    margin: 0 0 1rem;
+    padding: 0 0.25rem;
+    color: rgb(255 255 255 / 90%);
+    font-size: 0.975rem;
+    line-height: 1.5;
+    text-shadow: 0 1px 10px rgb(0 0 0 / 75%);
+
+    strong {
+      color: #fff;
+    }
+  }
+
+  // The heading, tagline and widget sit together at the bottom; the video shows above them.
   .schedule-picker {
     flex: none;
     width: auto;
@@ -121,11 +153,12 @@
   }
 
   .schedule-heading,
+  .schedule-tagline,
   .schedule-picker {
     animation: widget-in 900ms 3s var(--ease-out) both;
   }
 
-  // The member has already interacted: no wait, just a short fade.
+  // The member has touched the page during the wait: no more waiting, just a short fade.
   .intro-skip {
     .schedule-media {
       animation: none;
@@ -133,6 +166,7 @@
     }
 
     .schedule-heading,
+    .schedule-tagline,
     .schedule-picker {
       animation: widget-in-now 260ms var(--ease-out) both;
     }
@@ -166,8 +200,10 @@
   }
 
   .schedule-heading,
+  .schedule-tagline,
   .schedule-picker,
   .intro-skip .schedule-heading,
+  .intro-skip .schedule-tagline,
   .intro-skip .schedule-picker {
     animation: none;
   }

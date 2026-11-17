@@ -7,17 +7,18 @@ import {
   UrlTree,
   provideRouter,
 } from '@angular/router';
-import { authGuard, guestGuard } from './auth.guards';
+import { adminGuard, authGuard, guestGuard } from './auth.guards';
 import { AuthService } from './auth.service';
 
 describe('auth guards', () => {
   const isAuthenticated = signal(false);
+  const user = signal<{ isAdmin?: boolean } | null>(null);
   const route = {} as ActivatedRouteSnapshot;
   const state = { url: '/schedule?service=lift-club' } as RouterStateSnapshot;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: AuthService, useValue: { isAuthenticated } }],
+      providers: [provideRouter([]), { provide: AuthService, useValue: { isAuthenticated, user } }],
     });
   });
 
@@ -32,6 +33,18 @@ describe('auth guards', () => {
   it('authGuard sends signed-out users to login with a return URL', () => {
     isAuthenticated.set(false);
     expect(serialize(run(authGuard))).toBe('/login?returnUrl=%2Fschedule%3Fservice%3Dlift-club');
+  });
+
+  it('adminGuard admits only the owner', () => {
+    isAuthenticated.set(false);
+    expect(serialize(run(adminGuard))).toBe('/login?returnUrl=%2Fschedule%3Fservice%3Dlift-club');
+
+    isAuthenticated.set(true);
+    user.set({ isAdmin: false });
+    expect(serialize(run(adminGuard))).toBe('/lift-club');
+
+    user.set({ isAdmin: true });
+    expect(run(adminGuard)).toBe(true);
   });
 
   it('guestGuard keeps signed-in users off the login page', () => {

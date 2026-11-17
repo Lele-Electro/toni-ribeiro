@@ -11,10 +11,12 @@ describe('Navbar', () => {
   let fixture: ComponentFixture<Navbar>;
   let element: HTMLElement;
   let router: Router;
-  const auth = { isAuthenticated: signal(false), logout: vi.fn() };
+  const user = signal<{ isAdmin?: boolean } | null>(null);
+  const auth = { isAuthenticated: signal(false), user, logout: vi.fn() };
 
   beforeEach(async () => {
     auth.isAuthenticated.set(false);
+    user.set(null);
     auth.logout.mockReset();
     TestBed.configureTestingModule({
       imports: [Navbar],
@@ -75,6 +77,27 @@ describe('Navbar', () => {
     await fixture.whenStable();
     expect(dropdown().hidden).toBe(true);
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('gives the owner a Manage bookings link under Other', async () => {
+    expect(toggle().disabled).toBe(true);
+    auth.isAuthenticated.set(true);
+    user.set({ isAdmin: true });
+    await fixture.whenStable();
+    expect(toggle().disabled).toBe(false);
+    toggle().click();
+    await fixture.whenStable();
+    expect(dropdown().hidden).toBe(false);
+    const link = dropdown().querySelector<HTMLAnchorElement>('a')!;
+    expect(link.textContent?.trim()).toBe('Manage bookings');
+    link.click();
+    await fixture.whenStable();
+    expect(router.url).toBe('/admin');
+    expect(dropdown().hidden).toBe(true);
+
+    user.set({ isAdmin: false });
+    await fixture.whenStable();
+    expect(toggle().disabled).toBe(true);
   });
 
   it('keeps account controls visible outside Other and switches to logout', async () => {

@@ -41,7 +41,7 @@
 
   <nav class="overlay__nav" aria-label="Main navigation">
     <ul class="overlay__list">
-      @for (item of items; track item.key; let index = $index) {
+      @for (item of items(); track item.key; let index = $index) {
         <li [style.--i]="index">
           @if (item.disabled) {
             <span class="overlay__link is-disabled" aria-disabled="true"
@@ -61,7 +61,7 @@
         </li>
       }
     </ul>
-    <div class="overlay__account" [style.--i]="items.length">
+    <div class="overlay__account" [style.--i]="items().length">
       @if (authenticated()) {
         <button type="button" class="overlay__auth" (click)="signOut()">Log out</button>
       } @else {

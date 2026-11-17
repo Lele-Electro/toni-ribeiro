@@ -1,17 +1,13 @@
-import { isPlatformBrowser } from '@angular/common';
 import {
   Component,
   DestroyRef,
   ElementRef,
-  PLATFORM_ID,
   afterNextRender,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { DayScheduler } from '../../shared/day-scheduler/day-scheduler';
-
-const INTRO_SEEN_KEY = 'ribeiro.liftClubIntroSeen';
 
 @Component({
   selector: 'app-lift-club',
@@ -26,16 +22,13 @@ const INTRO_SEEN_KEY = 'ribeiro.liftClubIntroSeen';
 })
 export class LiftClub {
   private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
-  private readonly storage = isPlatformBrowser(inject(PLATFORM_ID))
-    ? globalThis.sessionStorage
-    : null;
 
   /**
-   * On a phone's first arrival the video plays alone for about three seconds before the
-   * booking widget fades in (a CSS animation, see lift-club.scss). Once the member has
-   * touched the page, the wait is skipped, now and on later visits in this session.
+   * On phones the video plays alone for about three seconds before the booking widget fades
+   * in (a CSS animation, see lift-club.scss), on every visit, including after a refresh.
+   * Touching the page skips the rest of the wait, for this visit only.
    */
-  protected readonly introSkipped = signal(this.introSeen());
+  protected readonly introSkipped = signal(false);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -62,20 +55,6 @@ export class LiftClub {
   }
 
   protected skipIntro(): void {
-    if (this.introSkipped()) return;
     this.introSkipped.set(true);
-    try {
-      this.storage?.setItem(INTRO_SEEN_KEY, '1');
-    } catch {
-      // Private browsing can refuse storage; the intro then simply replays next visit.
-    }
-  }
-
-  private introSeen(): boolean {
-    try {
-      return this.storage?.getItem(INTRO_SEEN_KEY) === '1';
-    } catch {
-      return false;
-    }
   }
 }

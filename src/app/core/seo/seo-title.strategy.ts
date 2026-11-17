@@ -3,9 +3,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, TitleStrategy } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { SITE_NAME } from '../site.config';
-
-const DEFAULT_DESCRIPTION =
-  'Toni Ribeiro runs a private lift club for safe, scheduled shared commuting, and a referral business that rewards you for introductions.';
+import { DEFAULT_DESCRIPTION, fullTitle, pageTags } from './page-tags';
 
 /**
  * Route data understood by {@link SeoTitleStrategy}, alongside the route's `title`.
@@ -24,25 +22,23 @@ export class SeoTitleStrategy extends TitleStrategy {
   private readonly document = inject(DOCUMENT);
 
   override updateTitle(snapshot: RouterStateSnapshot): void {
-    const pageTitle = this.buildTitle(snapshot);
-    const title = pageTitle
-      ? `${pageTitle} | ${SITE_NAME}`
-      : `${SITE_NAME} | Tailored Services`;
+    const title = fullTitle(SITE_NAME, this.buildTitle(snapshot));
     const data = this.deepestChild(snapshot.root).data as SeoRouteData;
-    const description = data.description ?? DEFAULT_DESCRIPTION;
     const url = new URL(snapshot.url, environment.siteUrl);
     url.search = '';
     url.hash = '';
 
     this.title.setTitle(title);
-    this.meta.updateTag({ name: 'description', content: description });
-    this.meta.updateTag({ name: 'robots', content: data.robots ?? 'index, follow' });
-    this.meta.updateTag({ property: 'og:type', content: 'website' });
-    this.meta.updateTag({ property: 'og:site_name', content: SITE_NAME });
-    this.meta.updateTag({ property: 'og:title', content: title });
-    this.meta.updateTag({ property: 'og:description', content: description });
-    this.meta.updateTag({ property: 'og:url', content: url.href });
-    this.meta.updateTag({ name: 'twitter:card', content: 'summary' });
+    for (const tag of pageTags({
+      siteName: SITE_NAME,
+      siteUrl: environment.siteUrl,
+      title,
+      description: data.description ?? DEFAULT_DESCRIPTION,
+      url: url.href,
+      robots: data.robots ?? 'index, follow',
+    })) {
+      this.meta.updateTag(tag);
+    }
     this.setCanonical(url.href);
   }
 

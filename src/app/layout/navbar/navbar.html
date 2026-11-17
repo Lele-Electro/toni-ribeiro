@@ -1,6 +1,7 @@
 <app-mobile-menu
   [appearance]="appearance()"
   [authenticated]="hydrated() && auth.isAuthenticated()"
+  [admin]="isAdmin()"
   (logout)="logout()"
 />
 <nav
@@ -36,8 +37,8 @@
         [class.is-active]="activeSection() === 'other'"
         [attr.aria-expanded]="menuOpen()"
         aria-controls="other-navigation"
-        [disabled]="otherDisabled"
-        [attr.title]="otherDisabled ? 'Coming soon' : null"
+        [disabled]="otherDisabled()"
+        [attr.title]="otherDisabled() ? 'Coming soon' : null"
         (click)="toggleMenu()"
       >
         Other
@@ -48,7 +49,7 @@
         [hidden]="!menuOpen()"
         aria-label="Other pages"
       >
-        @for (item of otherItems; track item.path) {
+        @for (item of otherItems(); track item.path) {
           <li>
             @if (item.disabled) {
               <span class="is-disabled" aria-disabled="true" title="Coming soon">{{
