@@ -88,8 +88,7 @@
   pointer-events: none;
 }
 
-// Phones: the video is the whole background, and the booking widget arrives after it
-// has played for about three seconds.
+// Phones show a still background behind the booking widget.
 @media (max-width: 40rem) {
   .schedule-page {
     container-type: normal;
@@ -104,7 +103,7 @@
     // 60px stays clear beneath the widget, plus any home-indicator inset.
     padding: 4.75rem 1rem calc(3.75rem + env(safe-area-inset-bottom, 0px));
     overflow: visible;
-    // Shows through the video as it dims, keeping white text and the widget legible.
+    // Shows through the poster, keeping white text and the widget legible.
     background: #0b1c16;
   }
 
@@ -112,7 +111,7 @@
     inset: 0;
     background: none;
     clip-path: none;
-    animation: media-dim 900ms 3s ease both;
+    opacity: 0.7;
   }
 
   .schedule-video {
@@ -150,61 +149,5 @@
     width: auto;
     height: auto;
     margin: 0;
-  }
-
-  .schedule-heading,
-  .schedule-tagline,
-  .schedule-picker {
-    animation: widget-in 900ms 3s var(--ease-out) both;
-  }
-
-  // The member has touched the page during the wait: no more waiting, just a short fade.
-  .intro-skip {
-    .schedule-media {
-      animation: none;
-      opacity: 0.7;
-    }
-
-    .schedule-heading,
-    .schedule-tagline,
-    .schedule-picker {
-      animation: widget-in-now 260ms var(--ease-out) both;
-    }
-  }
-}
-
-@keyframes media-dim {
-  to {
-    opacity: 0.7;
-  }
-}
-
-@keyframes widget-in {
-  from {
-    opacity: 0;
-    transform: translateY(1.25rem);
-    visibility: hidden;
-  }
-}
-
-@keyframes widget-in-now {
-  from {
-    opacity: 0;
-  }
-}
-
-@media (max-width: 40rem) and (prefers-reduced-motion: reduce) {
-  .schedule-media {
-    animation: none;
-    opacity: 0.7;
-  }
-
-  .schedule-heading,
-  .schedule-tagline,
-  .schedule-picker,
-  .intro-skip .schedule-heading,
-  .intro-skip .schedule-tagline,
-  .intro-skip .schedule-picker {
-    animation: none;
   }
 }

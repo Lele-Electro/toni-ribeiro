@@ -1,29 +1,23 @@
-<main
-  class="schedule-page"
-  [class.intro-skip]="introSkipped()"
-  aria-labelledby="schedule-heading"
-  (pointerdown)="skipIntro()"
-  (click)="skipIntro()"
-  (keydown)="skipIntro()"
->
-  <!-- Decorative: autoplays muted and looped, with the poster as the still fallback. -->
+<main class="schedule-page" aria-labelledby="schedule-heading">
   <div class="schedule-media" aria-hidden="true">
-    <video
-      #video
-      class="schedule-video"
-      muted
-      loop
-      playsinline
-      disablepictureinpicture
-      disableremoteplayback
-      preload="none"
-      poster="background-vid-create-2-poster.jpg"
-      tabindex="-1"
-      width="1382"
-      height="778"
-    >
-      <source src="background-vid-create-2.mp4" type="video/mp4" />
-    </video>
+    @if (playBackground()) {
+      <video
+        class="schedule-video"
+        [muted]="true"
+        autoplay
+        loop
+        playsinline
+        disablepictureinpicture
+        disableremoteplayback
+        poster="background-vid-create-2-poster.webp"
+        tabindex="-1"
+      >
+        <source src="background-vid-create-2.webm" type='video/webm; codecs="vp9"' />
+        <source src="background-vid-create-2.mp4" type="video/mp4" />
+      </video>
+    } @else {
+      <img class="schedule-video" src="background-vid-create-2-poster.webp" alt="" />
+    }
   </div>
 
   <h1 class="schedule-heading" id="schedule-heading">Toni's Schedule</h1>

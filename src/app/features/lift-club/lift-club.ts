@@ -1,12 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  afterNextRender,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, DestroyRef, afterNextRender, inject, signal } from '@angular/core';
 import { DayScheduler } from '../../shared/day-scheduler/day-scheduler';
 
 @Component({
@@ -21,40 +13,27 @@ import { DayScheduler } from '../../shared/day-scheduler/day-scheduler';
   },
 })
 export class LiftClub {
-  private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
-
-  /**
-   * On phones the video plays alone for about three seconds before the booking widget fades
-   * in (a CSS animation, see lift-club.scss), on every visit, including after a refresh.
-   * Touching the page skips the rest of the wait, for this visit only.
-   */
-  protected readonly introSkipped = signal(false);
+  protected readonly playBackground = signal(false);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      const video = this.video().nativeElement;
-      const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+      const desktopMotion = window.matchMedia('(width > 40rem) and (prefers-reduced-motion: no-preference)');
+      const connection = (navigator as Navigator & {
+        connection?: EventTarget & { saveData?: boolean; effectiveType?: string };
+      }).connection;
       const sync = () => {
-        if (reducedMotion?.matches) {
-          // Leave the poster showing as a still image.
-          video.pause();
-          return;
-        }
-        // Angular sets `muted` as an attribute after creating the element, which browsers
-        // ignore for autoplay; the property is what permits muted playback.
-        video.muted = true;
-        video.play()?.catch(() => {
-          // Autoplay refused (for example in a power-saving mode): the poster remains.
-        });
+        const constrained = connection?.saveData || ['slow-2g', '2g', '3g'].includes(connection?.effectiveType ?? '');
+        this.playBackground.set(document.readyState === 'complete' && desktopMotion.matches && !constrained);
       };
-      sync();
-      reducedMotion?.addEventListener?.('change', sync);
-      destroyRef.onDestroy(() => reducedMotion?.removeEventListener?.('change', sync));
-    });
-  }
 
-  protected skipIntro(): void {
-    this.introSkipped.set(true);
+      const listeners = new AbortController();
+      const options = { signal: listeners.signal };
+      window.addEventListener('load', sync, options);
+      desktopMotion.addEventListener('change', sync, options);
+      connection?.addEventListener('change', sync, options);
+      destroyRef.onDestroy(() => listeners.abort());
+      sync();
+    });
   }
 }

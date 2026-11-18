@@ -17,7 +17,7 @@
     <app-navbar class="landing-navbar" />
     <img
       class="landing-portrait"
-      src="toni-home-page.png"
+      src="toni-home-page.webp"
       alt="Toni Ribeiro"
       width="1452"
       height="1456"
@@ -31,7 +31,7 @@
       class="hero-video__media"
       playsinline
       preload="none"
-      poster="create-1-poster.jpg"
+      poster="create-1-poster.webp"
       width="1372"
       height="760"
       aria-label="Toni Ribeiro introduces himself"
@@ -40,6 +40,9 @@
       (pause)="playing.set(false)"
       (ended)="playing.set(false)"
     >
+      <source media="(max-width: 40rem)" src="create-1-mobile.webm" type='video/webm; codecs="vp9, opus"' />
+      <source media="(max-width: 40rem)" src="create-1-mobile.mp4" type="video/mp4" />
+      <source src="create-1.webm" type='video/webm; codecs="vp9, opus"' />
       <source src="create-1.mp4" type="video/mp4" />
     </video>
     @if (!playing()) {

@@ -1,4 +1,4 @@
-import { LIFT_CLUB_PAGE, SHARE_IMAGE, fullTitle, pageTags } from './page-tags';
+import { DEFAULT_SHARE_IMAGE, LIFT_CLUB_PAGE, fullTitle, pageTags } from './page-tags';
 
 const contentOf = (tags: ReturnType<typeof pageTags>, key: string) =>
   tags.find((tag) => ('property' in tag ? tag.property : tag.name) === key)?.content;
@@ -11,12 +11,15 @@ describe('pageTags', () => {
     description: LIFT_CLUB_PAGE.description,
     url: 'https://toniribeiro.co.za/lift-club',
     robots: 'index, follow',
+    image: LIFT_CLUB_PAGE.image,
   });
 
-  it('shares every page with the portrait, as an absolute URL', () => {
-    expect(contentOf(tags, 'og:image')).toBe('https://toniribeiro.co.za/booking-secure-face.jpg');
-    expect(contentOf(tags, 'og:image:width')).toBe(String(SHARE_IMAGE.width));
-    expect(contentOf(tags, 'og:image:height')).toBe(String(SHARE_IMAGE.height));
+  it("shares the lift club with its own wide image, as an absolute URL", () => {
+    expect(contentOf(tags, 'og:image')).toBe('https://toniribeiro.co.za/share-lift-club.jpg');
+    expect(contentOf(tags, 'og:image:width')).toBe('1200');
+    expect(contentOf(tags, 'og:image:height')).toBe('630');
+    expect(contentOf(tags, 'og:image:alt')).toBe(LIFT_CLUB_PAGE.image.alt);
+    expect(contentOf(tags, 'twitter:card')).toBe('summary_large_image');
   });
 
   it("keeps the page's own title and description", () => {
@@ -26,7 +29,7 @@ describe('pageTags', () => {
     expect(contentOf(tags, 'og:url')).toBe('https://toniribeiro.co.za/lift-club');
   });
 
-  it('leaves out the URL and robots tags when they are not given', () => {
+  it('shares every other page with the portrait and leaves out tags that are not given', () => {
     const shell = pageTags({
       siteName: 'Toni Ribeiro',
       siteUrl: 'https://toniribeiro.co.za',
@@ -35,6 +38,9 @@ describe('pageTags', () => {
     });
     expect(contentOf(shell, 'og:url')).toBeUndefined();
     expect(contentOf(shell, 'robots')).toBeUndefined();
-    expect(contentOf(shell, 'og:image')).toBe('https://toniribeiro.co.za/booking-secure-face.jpg');
+    expect(contentOf(shell, 'og:image')).toBe('https://toniribeiro.co.za/share-toni-ribeiro.jpg');
+    expect(contentOf(shell, 'og:image:width')).toBe(String(DEFAULT_SHARE_IMAGE.width));
+    expect(contentOf(shell, 'og:image:height')).toBe(String(DEFAULT_SHARE_IMAGE.height));
+    expect(contentOf(shell, 'twitter:card')).toBe('summary');
   });
 });

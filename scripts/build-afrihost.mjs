@@ -67,6 +67,7 @@ writeFileSync(
     description: LIFT_CLUB_PAGE.description,
     url: new URL(LIFT_CLUB_PAGE.path, `${environment.siteUrl}/`).href,
     robots: 'index, follow',
+    image: LIFT_CLUB_PAGE.image,
   }),
 );
 
@@ -105,6 +106,9 @@ DirectorySlash Off
   </FilesMatch>
   <FilesMatch "-[A-Za-z0-9_-]{8}\\.(js|css)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\\.(mp4|webm|webp)$">
+    Header set Cache-Control "public, max-age=86400"
   </FilesMatch>
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"

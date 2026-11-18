@@ -4,14 +4,28 @@
 export const DEFAULT_DESCRIPTION =
   'Toni Ribeiro runs a private lift club for safe, scheduled shared commuting, and a referral business that rewards you for introductions.';
 
-/** The picture shown whenever any page is shared, for example on WhatsApp or Facebook. */
-export const SHARE_IMAGE = {
-  path: 'booking-secure-face.jpg',
+/** The picture shown when a page is shared, for example on WhatsApp or Facebook. */
+export interface ShareImage {
+  /** File in public/, relative to the site root. */
+  path: string;
+  type: string;
+  width: number;
+  height: number;
+  alt: string;
+  /** "summary" shows a square thumbnail; "summary_large_image" a wide banner. */
+  twitterCard: 'summary' | 'summary_large_image';
+}
+
+/** Shared with every page except the lift club. Keep share images under 300 KB for WhatsApp. */
+export const DEFAULT_SHARE_IMAGE: ShareImage = {
+  path: 'share-toni-ribeiro.jpg',
   type: 'image/jpeg',
-  width: 400,
-  height: 557,
-  alt: 'Toni Ribeiro, smiling',
-} as const;
+  width: 1022,
+  height: 1104,
+  alt: 'Toni Ribeiro, smiling, above the address www.toniribeiro.co.za',
+  // A large card would crop the portrait to a wide strip through the face.
+  twitterCard: 'summary',
+};
 
 /**
  * The lift club is rendered in the browser, never ahead of time, so the Afrihost build writes
@@ -22,7 +36,15 @@ export const LIFT_CLUB_PAGE = {
   path: 'lift-club',
   title: 'Private Lift Club',
   description:
-    'Join a private lift club with vetted drivers, fixed routes and booked seats. Share the commute, split the cost and travel with people you know.',
+    'Toni Ribeiro runs a private lift club for safe, scheduled shared commuting. Rosebank, Illovo, Sandton, Morningside, and Bryanston are the main pickup points. Join the club to get a lift or refer a friend to earn rewards.',
+  image: {
+    path: 'share-lift-club.jpg',
+    type: 'image/jpeg',
+    width: 1200,
+    height: 630,
+    alt: 'The TR logo beside Toni’s red Volvo S60',
+    twitterCard: 'summary_large_image',
+  },
 } as const;
 
 export interface PageTagInput {
@@ -35,6 +57,8 @@ export interface PageTagInput {
   /** Absolute canonical URL. Leave out for a page served at many addresses. */
   url?: string;
   robots?: string;
+  /** Defaults to {@link DEFAULT_SHARE_IMAGE}. */
+  image?: ShareImage;
 }
 
 /** A `<meta>` tag, identified by `name` or, for Open Graph, by `property`. */
@@ -45,9 +69,10 @@ export function fullTitle(siteName: string, pageTitle?: string): string {
   return pageTitle ? `${pageTitle} | ${siteName}` : `${siteName} | Tailored Services`;
 }
 
-/** Search and link-preview tags for a page, all sharing the same image. */
+/** Search and link-preview tags for a page. */
 export function pageTags(page: PageTagInput): PageTag[] {
-  const image = new URL(SHARE_IMAGE.path, page.siteUrl).href;
+  const share = page.image ?? DEFAULT_SHARE_IMAGE;
+  const image = new URL(share.path, page.siteUrl).href;
   const tags: PageTag[] = [{ name: 'description', content: page.description }];
   if (page.robots) tags.push({ name: 'robots', content: page.robots });
   tags.push(
@@ -59,12 +84,11 @@ export function pageTags(page: PageTagInput): PageTag[] {
   if (page.url) tags.push({ property: 'og:url', content: page.url });
   tags.push(
     { property: 'og:image', content: image },
-    { property: 'og:image:type', content: SHARE_IMAGE.type },
-    { property: 'og:image:width', content: String(SHARE_IMAGE.width) },
-    { property: 'og:image:height', content: String(SHARE_IMAGE.height) },
-    { property: 'og:image:alt', content: SHARE_IMAGE.alt },
-    // "summary" shows the portrait as a square thumbnail; a large card would crop the face.
-    { name: 'twitter:card', content: 'summary' },
+    { property: 'og:image:type', content: share.type },
+    { property: 'og:image:width', content: String(share.width) },
+    { property: 'og:image:height', content: String(share.height) },
+    { property: 'og:image:alt', content: share.alt },
+    { name: 'twitter:card', content: share.twitterCard },
   );
   return tags;
 }

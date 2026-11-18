@@ -35,10 +35,8 @@ Google Places implementation is commented out in `google-places.service.ts` and
 
 At phone widths (40rem and below) the table is replaced by `MobileBookingWidget`, which
 shows one day at a time, a swipeable row of hours and one action button. It reads the
-same slots and opens the same booking dialog as the desktop table. The page background
-is `public/background-vid-create-2.mp4`; on a phone's first visit the widget fades in
-after the video has played for about three seconds, and not again once the member has
-interacted with the page in that browser session.
+same slots and opens the same booking dialog as the desktop table. Phones show the booking controls immediately over a still background. On larger screens,
+a short silent loop plays after page load when motion and network preferences allow it.
 
 Two HTML emails are sent after the five-minute quiet period: the member's confirmation
 and a notification to Toni (`RIBEIRO_BOOKING_NOTIFY_TO`, defaulting to the sender).

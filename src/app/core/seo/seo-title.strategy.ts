@@ -3,7 +3,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, TitleStrategy } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { SITE_NAME } from '../site.config';
-import { DEFAULT_DESCRIPTION, fullTitle, pageTags } from './page-tags';
+import { DEFAULT_DESCRIPTION, ShareImage, fullTitle, pageTags } from './page-tags';
 
 /**
  * Route data understood by {@link SeoTitleStrategy}, alongside the route's `title`.
@@ -13,6 +13,8 @@ export interface SeoRouteData {
   description?: string;
   /** Defaults to "index, follow". */
   robots?: string;
+  /** The link-preview picture; defaults to the portrait. */
+  image?: ShareImage;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -36,6 +38,7 @@ export class SeoTitleStrategy extends TitleStrategy {
       description: data.description ?? DEFAULT_DESCRIPTION,
       url: url.href,
       robots: data.robots ?? 'index, follow',
+      image: data.image,
     })) {
       this.meta.updateTag(tag);
     }

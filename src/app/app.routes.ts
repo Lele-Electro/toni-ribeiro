@@ -12,7 +12,10 @@ export const routes: Routes = [
   {
     path: LIFT_CLUB_PAGE.path,
     title: LIFT_CLUB_PAGE.title,
-    data: { description: LIFT_CLUB_PAGE.description } satisfies SeoRouteData,
+    data: {
+      description: LIFT_CLUB_PAGE.description,
+      image: LIFT_CLUB_PAGE.image,
+    } satisfies SeoRouteData,
     loadComponent: () => import('./features/lift-club/lift-club').then((m) => m.LiftClub),
   },
   {
