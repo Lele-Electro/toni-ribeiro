@@ -345,6 +345,20 @@ svg path {
   text-align: center;
 }
 
+// Smaller than the Reserve button (3.5rem, full width) but still a 44px target. Look and
+// pulse: .see-reviews in styles/_components.scss.
+.widget__reviews {
+  justify-self: center;
+  min-height: 2.75rem;
+  margin-top: -0.35rem;
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+
+  svg path {
+    stroke-width: 2;
+  }
+}
+
 .widget :focus-visible {
   outline: 3px solid #c9831f;
   outline-offset: 2px;

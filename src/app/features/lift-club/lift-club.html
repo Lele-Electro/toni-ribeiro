@@ -1,23 +1,28 @@
-<main class="schedule-page" aria-labelledby="schedule-heading">
+<main
+  class="schedule-page"
+  [class.intro-skip]="introSkipped()"
+  aria-labelledby="schedule-heading"
+  (pointerdown)="skipIntro()"
+  (click)="skipIntro()"
+  (keydown)="skipIntro()"
+>
+  <!-- Decorative: autoplays muted and looped, with the poster as the still fallback. -->
   <div class="schedule-media" aria-hidden="true">
-    @if (playBackground()) {
-      <video
-        class="schedule-video"
-        [muted]="true"
-        autoplay
-        loop
-        playsinline
-        disablepictureinpicture
-        disableremoteplayback
-        poster="background-vid-create-2-poster.webp"
-        tabindex="-1"
-      >
-        <source src="background-vid-create-2.webm" type='video/webm; codecs="vp9"' />
-        <source src="background-vid-create-2.mp4" type="video/mp4" />
-      </video>
-    } @else {
-      <img class="schedule-video" src="background-vid-create-2-poster.webp" alt="" />
-    }
+    <video
+      #video
+      class="schedule-video"
+      muted
+      loop
+      playsinline
+      disablepictureinpicture
+      disableremoteplayback
+      preload="none"
+      poster="background-vid-create-2-poster.webp"
+      tabindex="-1"
+    >
+      <source src="background-vid-create-2.webm" type='video/webm; codecs="vp9"' />
+      <source src="background-vid-create-2.mp4" type="video/mp4" />
+    </video>
   </div>
 
   <h1 class="schedule-heading" id="schedule-heading">Toni's Schedule</h1>
@@ -26,5 +31,27 @@
     Joburg residents, parents and Joburgers who&rsquo;d rather ride with someone they know.
   </p>
 
-  <app-day-scheduler class="schedule-picker" />
+  <!--
+    One card, two faces. "See reviews" swivels it to the voice reviews; both faces stay
+    mounted, so the booking table keeps its day, time and form while it is turned away.
+  -->
+  <div
+    class="schedule-picker flip-card"
+    [class.is-flipped]="showReviews()"
+    [class.has-turned]="turned()"
+    [class.is-measured]="cardHeight() !== null"
+    [style.--card-height]="cardHeight() === null ? null : cardHeight() + 'px'"
+  >
+    <div #front class="flip-card__face flip-card__face--front" [attr.inert]="showReviews() ? '' : null">
+      <app-day-scheduler class="flip-card__scheduler" (seeReviews)="flip(true)" />
+    </div>
+    <div
+      #back
+      class="flip-card__face flip-card__face--back"
+      [attr.inert]="showReviews() ? null : ''"
+      (keydown.escape)="flip(false)"
+    >
+      <app-voice-reviews [active]="showReviews()" (back)="flip(false)" />
+    </div>
+  </div>
 </main>

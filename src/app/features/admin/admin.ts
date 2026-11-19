@@ -1,6 +1,14 @@
 import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
-import { AdminAccount, AdminBooking, AdminOverview, AdminService } from '../../core/admin/admin.service';
+import {
+  AdminAccount,
+  AdminBooking,
+  AdminOverview,
+  AdminService,
+  AdminVoiceReview,
+} from '../../core/admin/admin.service';
 import { httpErrorMessage } from '../../core/http-error-message';
+import { VoiceReviewsService } from '../../core/voice-reviews/voice-reviews.service';
+import { formatTime } from '../lift-club/voice-reviews/review-audio';
 import { SCHEDULE_TIME_ZONE, slotLabel } from '../../shared/day-scheduler/scheduler-time';
 
 const DAY = new Intl.DateTimeFormat('en-ZA', {
@@ -33,6 +41,7 @@ const JOINED = new Intl.DateTimeFormat('en-ZA', {
 })
 export class Admin {
   private readonly admin = inject(AdminService);
+  private readonly voiceReviews = inject(VoiceReviewsService);
 
   protected readonly overview = signal<AdminOverview | null>(null);
   protected readonly loadError = signal<string | null>(null);
@@ -44,6 +53,7 @@ export class Admin {
 
   protected readonly bookings = computed(() => this.overview()?.bookings ?? []);
   protected readonly accounts = computed(() => this.overview()?.accounts ?? []);
+  protected readonly reviews = computed(() => this.overview()?.voiceReviews ?? []);
   protected readonly memberCount = computed(
     () => this.accounts().filter((account) => !account.isAdmin).length,
   );
@@ -63,6 +73,25 @@ export class Admin {
 
   protected joined(account: AdminAccount): string {
     return JOINED.format(new Date(account.createdAt));
+  }
+
+  protected reviewAudio(review: AdminVoiceReview): string {
+    return this.voiceReviews.audioUrl({ id: review._id, revision: review.revision });
+  }
+
+  protected reviewLength(review: AdminVoiceReview): string {
+    return formatTime(review.duration);
+  }
+
+  protected reviewDate(review: AdminVoiceReview): string {
+    return JOINED.format(new Date(review.updatedAt));
+  }
+
+  protected removeReview(review: AdminVoiceReview): Promise<void> {
+    return this.run(
+      () => this.admin.removeVoiceReview(review._id),
+      `Removed the voice review from ${review.name}. It is no longer on the lift club page.`,
+    );
   }
 
   protected isAdminMember(booking: AdminBooking): boolean {
@@ -92,7 +121,7 @@ export class Admin {
   protected reset(): Promise<void> {
     return this.run(
       () => this.admin.reset(),
-      'Reset complete: every member account and every booking has been deleted.',
+      'Reset complete: every member account, booking and voice review has been deleted.',
     );
   }
 

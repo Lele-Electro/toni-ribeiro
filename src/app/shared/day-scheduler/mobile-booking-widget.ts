@@ -41,6 +41,7 @@ export class MobileBookingWidget {
   readonly dateChange = output<string>();
   readonly book = output<{ hour: number; booking?: LiftBooking }>();
   readonly retry = output<void>();
+  readonly seeReviews = output<void>();
 
   private readonly carousel = viewChild<ElementRef<HTMLElement>>('carousel');
   /** The hour the member tapped; null until then, so the first open slot is suggested. */

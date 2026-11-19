@@ -70,6 +70,73 @@
   margin: 0 0 0 5vw;
 }
 
+// The booking table and the voice reviews are the two faces of one card. Both faces turn
+// about the vertical axis inside the card's shared perspective, 180° apart, so they swivel
+// as a single card. A slight dip in scale at the half-way point gives the turn some weight.
+.flip-card {
+  --turn: 850ms;
+  --turn-ease: cubic-bezier(0.65, 0, 0.35, 1);
+
+  perspective: 2200px;
+}
+
+// Only one face is ever drawn: the turned-away face becomes hidden at the half-way point,
+// when the card is edge-on, and the incoming face appears at that same moment. This does not
+// rely on backface-visibility alone, which Chrome ignores for faces that contain
+// backdrop-filter (the turned-away face showed through, mirrored).
+.flip-card__face {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition:
+    transform var(--turn) var(--turn-ease),
+    visibility 0s linear calc(var(--turn) / 2);
+
+  &[inert] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+// At rest the front has no transform at all, so the booking table renders exactly as before.
+.flip-card__face--back {
+  transform: rotateY(180deg);
+}
+
+.is-flipped .flip-card__face--front {
+  transform: rotateY(-180deg);
+}
+
+.is-flipped .flip-card__face--back {
+  transform: rotateY(0deg);
+}
+
+.has-turned .flip-card__face {
+  animation: card-lift-a var(--turn) ease-in-out;
+}
+
+// A second, identical keyframe set restarts the lift on every turn.
+.has-turned.is-flipped .flip-card__face {
+  animation-name: card-lift-b;
+}
+
+.flip-card__scheduler {
+  height: 100%;
+}
+
+@keyframes card-lift-a {
+  50% {
+    scale: 0.93;
+  }
+}
+
+@keyframes card-lift-b {
+  50% {
+    scale: 0.93;
+  }
+}
+
 .schedule-media {
   position: absolute;
   inset: 0 0 0 49.4%;
@@ -88,7 +155,8 @@
   pointer-events: none;
 }
 
-// Phones show a still background behind the booking widget.
+// Phones: the video is the whole background, and the booking widget arrives after it
+// has played for about three seconds.
 @media (max-width: 40rem) {
   .schedule-page {
     container-type: normal;
@@ -103,7 +171,7 @@
     // 60px stays clear beneath the widget, plus any home-indicator inset.
     padding: 4.75rem 1rem calc(3.75rem + env(safe-area-inset-bottom, 0px));
     overflow: visible;
-    // Shows through the poster, keeping white text and the widget legible.
+    // Shows through the video as it dims, keeping white text and the widget legible.
     background: #0b1c16;
   }
 
@@ -111,7 +179,7 @@
     inset: 0;
     background: none;
     clip-path: none;
-    opacity: 0.7;
+    animation: media-dim 900ms 3s ease both;
   }
 
   .schedule-video {
@@ -149,5 +217,108 @@
     width: auto;
     height: auto;
     margin: 0;
+  }
+
+  .schedule-heading,
+  .schedule-tagline,
+  .schedule-picker {
+    animation: widget-in 900ms 3s var(--ease-out) both;
+  }
+
+  // Each face is as tall as its own content. Once both are measured, the card takes the
+  // height of the face that is showing and eases to the other's as it turns. The faces
+  // hang from the card's bottom edge, which stays put in this bottom-anchored layout.
+  .flip-card {
+    perspective: 1400px;
+    transition: height var(--turn) var(--turn-ease);
+
+    &.is-measured {
+      height: var(--card-height);
+    }
+  }
+
+  .flip-card__face {
+    inset: auto 0 0;
+  }
+
+  // Before the first measurement (and on the server), the booking face holds the space.
+  .flip-card:not(.is-measured) .flip-card__face--front {
+    position: relative;
+  }
+
+  .flip-card__scheduler {
+    height: auto;
+  }
+
+  // The member has touched the page during the wait: no more waiting, just a short fade.
+  .intro-skip {
+    .schedule-media {
+      animation: none;
+      opacity: 0.7;
+    }
+
+    .schedule-heading,
+    .schedule-tagline,
+    .schedule-picker {
+      animation: widget-in-now 260ms var(--ease-out) both;
+    }
+  }
+}
+
+@keyframes media-dim {
+  to {
+    opacity: 0.7;
+  }
+}
+
+@keyframes widget-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    visibility: hidden;
+  }
+}
+
+@keyframes widget-in-now {
+  from {
+    opacity: 0;
+  }
+}
+
+// Reduced motion: no swivel or lift, the faces simply swap.
+@media (prefers-reduced-motion: reduce) {
+  .flip-card__face,
+  .is-flipped .flip-card__face--front,
+  .is-flipped .flip-card__face--back {
+    transform: none;
+    transition: none;
+  }
+
+  .has-turned .flip-card__face {
+    animation: none;
+  }
+
+  .flip-card__face[inert] {
+    visibility: hidden;
+  }
+
+  .flip-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 40rem) and (prefers-reduced-motion: reduce) {
+  .schedule-media {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .schedule-heading,
+  .schedule-tagline,
+  .schedule-picker,
+  .intro-skip .schedule-heading,
+  .intro-skip .schedule-tagline,
+  .intro-skip .schedule-picker {
+    animation: none;
   }
 }

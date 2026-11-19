@@ -106,6 +106,17 @@
     color: var(--color-muted);
   }
 
+  // Outranks ".admin p", which removes paragraph margins.
+  p#{&}__hint {
+    margin-bottom: var(--space-3);
+  }
+
+  &__audio {
+    width: min(100%, 22rem);
+    height: 2.5rem;
+    margin-top: var(--space-2);
+  }
+
   &__retry {
     margin-left: var(--space-2);
     padding: 0;

@@ -338,3 +338,69 @@
     margin-bottom: var(--space-2);
   }
 }
+
+// "See reviews" on the lift club booking table (desktop column and mobile widget). It
+// breathes slowly between two of the table's greens, with a faint halo at the stronger end.
+// White text stays readable throughout: 9.9:1 on #1b4f43 and 6.5:1 on #4d6358.
+.see-reviews {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #1b4f43;
+  color: #fff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  animation: see-reviews-pulse 2.6s ease-in-out infinite alternate;
+  transition: transform 160ms ease;
+
+  svg {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  &:hover,
+  &:focus-visible {
+    animation: none;
+    background: #12382f;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes see-reviews-pulse {
+  from {
+    background-color: #1b4f43;
+    box-shadow: 0 0 0 4px rgb(27 79 67 / 18%);
+  }
+
+  to {
+    background-color: #4d6358;
+    box-shadow: 0 0 0 0 rgb(27 79 67 / 0%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .see-reviews {
+    animation: none;
+  }
+}

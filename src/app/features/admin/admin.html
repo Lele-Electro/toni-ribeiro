@@ -4,8 +4,9 @@
       <span class="eyebrow">Owner tools</span>
       <h1>Manage bookings</h1>
       <p class="lead">
-        Remove a booking to free its slot, or delete an account with everything stored against
-        it. Nothing here can be undone, and members are not emailed about it.
+        Remove a booking to free its slot, take down a voice review, or delete an account with
+        everything stored against it. Nothing here can be undone, and members are not emailed
+        about it.
       </p>
     </header>
 
@@ -117,6 +118,71 @@
         }
       </section>
 
+      <section class="card admin__card" aria-labelledby="admin-reviews">
+        <h2 id="admin-reviews">Voice reviews ({{ reviews().length }})</h2>
+        @if (reviews().length) {
+          <p class="admin__muted admin__hint">
+            Every review here is live on the lift club page. Listen, and remove any that shouldn’t
+            be there; the member can record another.
+          </p>
+          <ul class="admin__list">
+            @for (review of reviews(); track review._id) {
+              <li class="admin__row">
+                <div class="admin__what">
+                  <p class="admin__who">
+                    {{ review.name }}
+                    @if (review.member; as member) {
+                      <span class="admin__muted">{{ member.email }}</span>
+                    }
+                  </p>
+                  <p class="admin__muted">
+                    {{ reviewLength(review) }} · recorded {{ reviewDate(review) }}
+                  </p>
+                  <audio
+                    class="admin__audio"
+                    controls
+                    preload="none"
+                    [src]="reviewAudio(review)"
+                    [attr.aria-label]="'Voice review from ' + review.name"
+                  ></audio>
+                </div>
+                <div class="admin__actions">
+                  @if (confirming() === 'review:' + review._id) {
+                    <span class="admin__question">Remove this review from the page?</span>
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      [disabled]="busy()"
+                      (click)="removeReview(review)"
+                    >
+                      Yes, remove
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--sm"
+                      [disabled]="busy()"
+                      (click)="confirming.set(null)"
+                    >
+                      Keep
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      (click)="ask('review:' + review._id)"
+                    >
+                      Remove review
+                    </button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="admin__empty">No voice reviews yet.</p>
+        }
+      </section>
+
       <section class="card admin__card" aria-labelledby="admin-accounts">
         <h2 id="admin-accounts">Accounts ({{ accounts().length }})</h2>
         <ul class="admin__list">
@@ -172,8 +238,8 @@
         <h2 id="admin-reset">Reset everything</h2>
         <p>
           Deletes all {{ memberCount() }} member
-          {{ memberCount() === 1 ? 'account' : 'accounts' }} and every booking, including your
-          own bookings. Your owner account stays so that you can still log in.
+          {{ memberCount() === 1 ? 'account' : 'accounts' }}, every booking and every voice review,
+          including your own. Your owner account stays so that you can still log in.
         </p>
         @if (confirming() === 'reset') {
           <p class="admin__question">This cannot be undone. Delete everything?</p>

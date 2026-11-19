@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminOverview, AdminService } from '../../core/admin/admin.service';
+import { VoiceReviewsService } from '../../core/voice-reviews/voice-reviews.service';
 import { Admin } from './admin';
 
 describe('Admin', () => {
@@ -11,6 +12,7 @@ describe('Admin', () => {
     removeBooking: vi.fn(),
     deleteAccount: vi.fn(),
     reset: vi.fn(),
+    removeVoiceReview: vi.fn(),
   };
   const data = (): AdminOverview => ({
     accounts: [
@@ -45,6 +47,17 @@ describe('Admin', () => {
         member: { userId: 'ann', name: 'Ann', email: 'ann@example.com' },
       },
     ],
+    voiceReviews: [
+      {
+        _id: 'review-1',
+        name: 'Ann K.',
+        initials: 'AK',
+        duration: 14.2,
+        revision: 3,
+        updatedAt: '2026-11-18T08:00:00.000Z',
+        member: { userId: 'ann', name: 'Ann Khumalo', email: 'ann@example.com' },
+      },
+    ],
   });
 
   beforeEach(async () => {
@@ -52,7 +65,13 @@ describe('Admin', () => {
     api.overview.mockResolvedValue(data());
     TestBed.configureTestingModule({
       imports: [Admin],
-      providers: [{ provide: AdminService, useValue: api }],
+      providers: [
+        { provide: AdminService, useValue: api },
+        {
+          provide: VoiceReviewsService,
+          useValue: { audioUrl: (r: { id: string; revision: number }) => `/audio/${r.id}?v=${r.revision}` },
+        },
+      ],
     });
     fixture = TestBed.createComponent(Admin);
     element = fixture.nativeElement;
@@ -104,6 +123,23 @@ describe('Admin', () => {
     await click('Yes, delete');
     expect(api.deleteAccount).toHaveBeenCalledWith('ann');
     expect(element.querySelector('[role="alert"]')!.textContent).toContain('Not allowed.');
+  });
+
+  it('lists voice reviews to listen to, and removes one after a second click', async () => {
+    const reviews = card('admin-reviews');
+    expect(reviews.textContent).toContain('Voice reviews (1)');
+    expect(reviews.textContent).toContain('Ann K.');
+    expect(reviews.textContent).toContain('ann@example.com');
+    expect(reviews.textContent).toContain('0:14');
+    expect(reviews.querySelector('audio')!.getAttribute('src')).toBe('/audio/review-1?v=3');
+
+    await click('Remove review');
+    expect(api.removeVoiceReview).not.toHaveBeenCalled();
+    api.overview.mockResolvedValue({ ...data(), voiceReviews: [] });
+    await click('Yes, remove', card('admin-reviews'));
+    expect(api.removeVoiceReview).toHaveBeenCalledWith('review-1');
+    expect(element.querySelector('[role="status"]')!.textContent).toContain('Removed the voice review from Ann K.');
+    expect(card('admin-reviews').textContent).toContain('No voice reviews yet');
   });
 
   it('resets everything only after confirmation', async () => {

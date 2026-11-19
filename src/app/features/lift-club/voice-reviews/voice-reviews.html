@@ -1,0 +1,88 @@
+<section class="reviews" aria-labelledby="reviews-heading">
+  <header class="reviews__head">
+    <div>
+      <p class="eyebrow">Rider voices</p>
+      <h2 class="reviews__title" id="reviews-heading" #heading tabindex="-1">Voice reviews</h2>
+    </div>
+    <button type="button" class="reviews__back" (click)="back.emit()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" /></svg>
+      Back to booking
+    </button>
+  </header>
+
+  <!-- role="list": Safari drops list semantics when list-style is none. -->
+  <ul
+    class="reviews__list"
+    role="list"
+    aria-labelledby="reviews-heading"
+    [attr.aria-busy]="!reviews() && !store.loadFailed()"
+  >
+    @if (!reviews()) {
+      <li class="reviews__state">
+        @if (store.loadFailed()) {
+          <span role="alert">The voice reviews couldn’t be loaded.</span>
+          <button type="button" class="reviews__retry" (click)="store.load()">Try again</button>
+        } @else {
+          Loading voice reviews…
+        }
+      </li>
+    }
+    @for (review of reviews(); track review.id; let i = $index) {
+      <li
+        class="review"
+        [class.review--own]="review.own"
+        [class.is-current]="player.activeId() === review.id"
+        [class.is-playing]="player.isPlaying(review.id)"
+        [style.--i]="i"
+      >
+        <span
+          class="review__avatar"
+          [class.review__avatar--long]="review.initials.length > 2"
+          [style.--avatar]="review.colour"
+          aria-hidden="true"
+          >{{ review.initials }}</span
+        >
+        <button
+          type="button"
+          class="review__play"
+          [class.is-buffering]="player.isPlaying(review.id) && player.buffering()"
+          [attr.aria-label]="(player.isPlaying(review.id) ? 'Pause ' : 'Play ') + describe(review)"
+          (click)="player.toggle(review)"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            @if (player.isPlaying(review.id)) {
+              <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
+            } @else {
+              <path d="M8 5.5v13l10.5-6.5z" />
+            }
+          </svg>
+        </button>
+        <div class="review__body">
+          <p class="review__meta">
+            <span class="review__name">{{ review.own ? 'Your review' : review.name }}</span>
+            @if (review.sample) {
+              <span class="review__tag">Sample</span>
+            } @else if (review.own) {
+              <span class="review__tag">Live</span>
+            }
+            <span class="review__time">{{ player.time(review) }}</span>
+          </p>
+          <app-review-waveform
+            [peaks]="review.peaks"
+            [duration]="review.duration"
+            [progress]="player.progress(review)"
+            [label]="'Position in ' + describe(review)"
+            (seek)="player.seek(review, $event)"
+          />
+          @if (player.failedId() === review.id) {
+            <p class="review__error" role="alert">
+              This review couldn’t be played. Check your connection and try again.
+            </p>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+
+  <app-voice-recorder class="reviews__recorder" [active]="active()" />
+</section>

@@ -1,0 +1,171 @@
+<p class="sr-only" role="status">{{ status() }}</p>
+
+@switch (view()) {
+  @case ('recording') {
+    <div class="rec">
+      <p class="rec__clock">
+        <span class="rec__dot" aria-hidden="true"></span>
+        <span class="rec__label">Recording</span>
+        <span class="rec__time"
+          >{{ formatTime(elapsed()) }} <span class="rec__limit">/ {{ limit }}</span></span
+        >
+      </p>
+      <div class="meter" aria-hidden="true">
+        @for (level of levels(); track $index) {
+          <span [style.height.%]="level * 100"></span>
+        }
+      </div>
+      <button type="button" class="btn btn--stop" (click)="stop()">
+        <span class="stop-icon" aria-hidden="true"></span>Stop recording
+      </button>
+    </div>
+  }
+  @case ('processing') {
+    <p class="note">Preparing your recording…</p>
+  }
+  @case ('confirmed') {
+    <div class="done">
+      <svg class="done__icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10.5" />
+        <path d="m7 12.5 3.2 3.2L17 9" />
+      </svg>
+      <div class="done__body">
+        <p class="done__title" #doneTitle tabindex="-1">
+          {{ state() === 'confirmed' ? 'Thank you. Your review is live.' : 'Your review is live.' }}
+        </p>
+        <p class="note">
+          Everyone who visits this page can hear it, shown as
+          <strong>{{ store.mine()?.name ?? publicName() }}</strong
+          >{{ fullStop(store.mine()?.name ?? publicName()) }} You can replace or delete it at any
+          time.
+        </p>
+        @if (sendError()) {
+          <p class="problem" role="alert">{{ sendError() }}</p>
+        }
+        <div class="actions">
+          @if (confirmingDelete()) {
+            <span class="actions__question">Delete your review from this page?</span>
+            <button type="button" class="btn btn--stop" [disabled]="deleting()" (click)="remove()">
+              {{ deleting() ? 'Deleting…' : 'Yes, delete' }}
+            </button>
+            <button
+              type="button"
+              class="btn btn--quiet"
+              [disabled]="deleting()"
+              (click)="confirmingDelete.set(false)"
+            >
+              Keep it
+            </button>
+          } @else {
+            <button type="button" class="btn btn--ghost" (click)="start()">Record a new review</button>
+            <button type="button" class="btn btn--quiet" (click)="confirmingDelete.set(true)">
+              Delete it
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+  @default {
+    @if (preview(); as track) {
+      <div class="preview">
+        <div class="preview__row">
+          <button
+            type="button"
+            class="play"
+            [class.is-playing]="player.isPlaying(track.id)"
+            [attr.aria-label]="(player.isPlaying(track.id) ? 'Pause' : 'Play') + ' your recording'"
+            [disabled]="state() === 'saving'"
+            (click)="player.toggle(track)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              @if (player.isPlaying(track.id)) {
+                <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
+              } @else {
+                <path d="M8 5.5v13l10.5-6.5z" />
+              }
+            </svg>
+          </button>
+          <div class="preview__wave">
+            <p class="preview__meta">
+              <span>Your recording</span>
+              <span class="preview__time">{{ player.time(track) }}</span>
+            </p>
+            <app-review-waveform
+              [peaks]="track.peaks"
+              [duration]="track.duration"
+              [progress]="player.progress(track)"
+              label="Position in your recording"
+              (seek)="player.seek(track, $event)"
+            />
+          </div>
+        </div>
+        <p class="note">
+          Listen back first. When you confirm, everyone visiting this page can hear it, shown as
+          <strong>{{ publicName() }}</strong
+          >{{ store.mine() ? ', in place of your current review.' : fullStop(publicName()) }}
+        </p>
+        @if (sendError()) {
+          <p class="problem" role="alert">{{ sendError() }}</p>
+        }
+        <div class="actions">
+          <button
+            type="button"
+            class="btn btn--ghost"
+            [disabled]="state() === 'saving'"
+            (click)="start()"
+          >
+            Record again
+          </button>
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="state() === 'saving'"
+            (click)="confirm()"
+          >
+            {{ state() === 'saving' ? 'Publishing…' : 'Confirm review' }}
+          </button>
+        </div>
+      </div>
+    } @else if (!auth.isAuthenticated()) {
+      <a class="btn btn--primary btn--record" routerLink="/login" [queryParams]="signInQuery">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="11" rx="3" />
+          <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+        </svg>
+        Sign in to record a review
+      </a>
+      <p class="note">
+        Voice reviews come from signed-in riders. You’ll come straight back here afterwards.
+      </p>
+    } @else {
+      @if (message()) {
+        <p class="problem" role="alert">{{ message() }}</p>
+      }
+      <button
+        #recordButton
+        type="button"
+        class="btn btn--primary btn--record"
+        [disabled]="state() === 'starting'"
+        (click)="start()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="11" rx="3" />
+          <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+        </svg>
+        {{
+          state() === 'starting'
+            ? 'Allow microphone access…'
+            : message()
+              ? 'Try again'
+              : 'Record a voice review'
+        }}
+      </button>
+      @if (!message()) {
+        <p class="note">
+          Up to a minute. You’ll hear it back before it goes on this page for everyone.
+        </p>
+      }
+    }
+  }
+}

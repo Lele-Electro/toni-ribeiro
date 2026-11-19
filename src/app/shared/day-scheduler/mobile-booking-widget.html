@@ -145,4 +145,13 @@
     }
   </button>
   <p class="widget__note">One hour, reserved for you. Up to 3 travellers.</p>
+  <button
+    type="button"
+    class="see-reviews widget__reviews"
+    data-see-reviews
+    (click)="seeReviews.emit()"
+  >
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6.5v3M5 4v8M8 2v12M11 4.5v7M14 6.5v3" /></svg>
+    See reviews
+  </button>
 </section>

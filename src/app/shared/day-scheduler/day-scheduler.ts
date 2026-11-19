@@ -5,6 +5,7 @@ import {
   afterNextRender,
   computed,
   inject,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -49,6 +50,8 @@ export class DayScheduler {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  /** "See reviews" was pressed, on the desktop table or the mobile widget. */
+  readonly seeReviews = output<void>();
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('bookingDialog');
   private readonly whatsappField = viewChild<ElementRef<HTMLInputElement>>('whatsappField');
   private readonly pickupField = viewChild<PlaceAutocomplete>('pickupField');
