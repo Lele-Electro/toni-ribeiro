@@ -1,0 +1,219 @@
+<section class="card promo" id="promotional-email" aria-labelledby="admin-promo">
+  <h2 id="admin-promo">Promotional email</h2>
+  <p class="promo__muted promo__hint">
+    Sends “{{ subject }}”, opening with “Hi [name],” and your introduction, then the rest of the
+    invitation. Each recipient gets their own email, so nobody sees anyone else’s address.
+  </p>
+
+  <form class="promo__form" novalidate (submit)="$event.preventDefault(); requestSend()">
+    <div class="field">
+      <label for="promo-recipients">Recipients</label>
+      <textarea
+        id="promo-recipients"
+        rows="3"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="name@example.com, another@example.co.za"
+        [value]="recipientsText()"
+        [disabled]="sending()"
+        [attr.aria-invalid]="errors().recipients ? 'true' : null"
+        [attr.aria-describedby]="
+          'promo-recipients-summary' + (errors().recipients ? ' promo-recipients-error' : '')
+        "
+        (input)="setRecipients($event)"
+      ></textarea>
+      <span class="field__hint" id="promo-recipients-summary" aria-live="polite">
+        Separate addresses with commas, spaces or new lines.
+        @if (parsed().recipients.length) {
+          <strong
+            >{{ parsed().recipients.length }}
+            {{ parsed().recipients.length === 1 ? 'recipient' : 'recipients' }}</strong
+          >
+        }
+        @if (parsed().duplicates) {
+          · {{ parsed().duplicates }}
+          {{ parsed().duplicates === 1 ? 'duplicate' : 'duplicates' }} removed
+        }
+        @if (parsed().invalid.length && !errors().recipients) {
+          · <span class="promo__warn">{{ parsed().invalid.length }} not valid</span>
+        }
+        · at most {{ limits.recipients }} at a time
+      </span>
+      @if (errors().recipients; as error) {
+        <p class="field__error" id="promo-recipients-error">{{ error }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="promo-name">Name of the person or business</label>
+      <input
+        id="promo-name"
+        type="text"
+        autocomplete="off"
+        placeholder="e.g. Thandiwe, or Maboneng Rooftop"
+        [attr.maxlength]="limits.name"
+        [value]="name()"
+        [disabled]="sending()"
+        [attr.aria-invalid]="errors().name ? 'true' : null"
+        [attr.aria-describedby]="'promo-name-hint' + (errors().name ? ' promo-name-error' : '')"
+        (input)="setName($event)"
+      />
+      <span class="field__hint" id="promo-name-hint"
+        >The email opens “Hi {{ name().trim() || '[name]' }},”.</span
+      >
+      @if (errors().name; as error) {
+        <p class="field__error" id="promo-name-error">{{ error }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="promo-message">Introductory message</label>
+      <textarea
+        id="promo-message"
+        rows="6"
+        [attr.maxlength]="limits.message"
+        [value]="message()"
+        [disabled]="sending()"
+        [attr.aria-invalid]="errors().message ? 'true' : null"
+        [attr.aria-describedby]="
+          'promo-message-hint' + (errors().message ? ' promo-message-error' : '')
+        "
+        (input)="setMessage($event)"
+      ></textarea>
+      <span class="field__hint" id="promo-message-hint"
+        >Shown after the greeting, above the divider. A blank line starts a new paragraph.
+        {{ message().length }}/{{ limits.message }}</span
+      >
+      @if (errors().message; as error) {
+        <p class="field__error" id="promo-message-error">{{ error }}</p>
+      }
+    </div>
+
+    @if (sendError(); as error) {
+      <p class="alert alert--error" role="alert">{{ error }}</p>
+    }
+
+    @if (confirming()) {
+      <div class="promo__confirm" role="group" aria-labelledby="promo-confirm-question">
+        <p class="promo__question" id="promo-confirm-question">
+          Send {{ parsed().recipients.length }} separate
+          {{ parsed().recipients.length === 1 ? 'email' : 'emails' }} now? This can’t be undone.
+        </p>
+        <div class="promo__actions">
+          <button
+            #confirmButton
+            type="button"
+            class="btn btn--primary"
+            [disabled]="sending()"
+            [attr.aria-busy]="sending()"
+            (click)="send()"
+          >
+            {{ sending() ? 'Sending…' : 'Yes, send now' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn--ghost"
+            [disabled]="sending()"
+            (click)="confirming.set(false)"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="promo__actions">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="previewing() || sending()"
+          (click)="showPreview()"
+        >
+          {{ previewing() ? 'Loading preview…' : preview() ? 'Refresh preview' : 'Preview' }}
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="sending()">Send…</button>
+      </div>
+    }
+  </form>
+
+  @if (results(); as list) {
+    <div class="promo__results">
+      <h3 #resultsHeading tabindex="-1">
+        @if (duplicate()) {
+          Already sent: nobody was emailed again
+        } @else {
+          Sent {{ sentCount() }} of {{ list.length }}
+        }
+      </h3>
+      <ul role="list">
+        @for (result of list; track result.email) {
+          <li [class.is-failed]="result.status === 'failed'">
+            <span class="promo__status" aria-hidden="true">{{
+              result.status === 'sent' ? '✓' : '✕'
+            }}</span>
+            <span class="promo__address">{{ result.email }}</span>
+            <span class="promo__outcome"
+              >{{ result.status === 'sent' ? 'Sent' : 'Not sent' }}
+              @if (result.message) {
+                — {{ result.message }}
+              }
+            </span>
+          </li>
+        }
+      </ul>
+      <div class="promo__actions">
+        @if (failed().length) {
+          <button type="button" class="btn btn--primary btn--sm" (click)="retryFailed()">
+            Retry the {{ failed().length }} that failed
+          </button>
+        }
+        <button type="button" class="btn btn--ghost btn--sm" (click)="startOver()">
+          Write a new email
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (previewError(); as error) {
+    <p class="alert alert--error" role="alert">{{ error }}</p>
+  }
+  @if (preview(); as shown) {
+    <div class="promo__preview">
+      <div class="promo__preview-head">
+        <p>
+          <span class="promo__muted">Subject:</span>&nbsp;<strong>{{ shown.subject }}</strong>
+        </p>
+        <div class="promo__widths" role="group" aria-label="Preview width">
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            [attr.aria-pressed]="previewWidth() === 'desktop'"
+            (click)="previewWidth.set('desktop')"
+          >
+            Desktop
+          </button>
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            [attr.aria-pressed]="previewWidth() === 'phone'"
+            (click)="previewWidth.set('phone')"
+          >
+            Phone
+          </button>
+        </div>
+      </div>
+      @if (previewStale()) {
+        <p class="promo__stale" role="status">
+          You’ve changed the name or message since this preview.
+          <button type="button" class="promo__link" (click)="showPreview()">Refresh it</button>
+        </p>
+      }
+      <iframe
+        class="promo__frame"
+        [class.promo__frame--phone]="previewWidth() === 'phone'"
+        title="Preview of the promotional email"
+        sandbox="allow-popups allow-popups-to-escape-sandbox"
+        [srcdoc]="shown.html"
+      ></iframe>
+    </div>
+  }
+</section>

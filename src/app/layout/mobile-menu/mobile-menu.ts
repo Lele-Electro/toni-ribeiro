@@ -13,15 +13,17 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, PRIMARY_OUTLET, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
-import { isUnavailable } from '../../core/navigation';
+import { LIFT_CLUB_SEGMENTS, isUnavailable } from '../../core/navigation';
 
 interface MenuItem {
   key: string;
   label: string;
   path: string;
   query?: Record<string, string>;
-  /** The page has no content yet: listed, but not a link. */
+  /** Listed, but not a link. */
   disabled?: boolean;
+  /** Disabled because the page has no content yet ("Soon"). */
+  soon?: boolean;
 }
 
 const CLOSE_MS = 220;
@@ -42,6 +44,8 @@ export class MobileMenu {
   readonly authenticated = input(false);
   /** Signed in with the owner's account. */
   readonly admin = input(false);
+  /** Home (and the brand, which leads there) can't be used here; see EntryContext. */
+  readonly homeDisabled = input(false);
   readonly logout = output<void>();
 
   private readonly router = inject(Router);
@@ -65,17 +69,21 @@ export class MobileMenu {
       { key: 'privacy', label: 'Privacy Policy', path: '/privacy' },
       { key: 'terms', label: 'Terms of Service', path: '/terms' },
     ] satisfies MenuItem[]
-  ).map((item) => ({ ...item, disabled: isUnavailable(item.path) }));
+  ).map((item) => ({ ...item, soon: isUnavailable(item.path) }));
   /** The owner's account also gets the booking-management page, after the lift club. */
-  protected readonly items = computed<MenuItem[]>(() =>
-    this.admin()
+  protected readonly items = computed<MenuItem[]>(() => {
+    const pages = this.pages.map((item) => ({
+      ...item,
+      disabled: item.soon || (item.key === 'home' && this.homeDisabled()),
+    }));
+    return this.admin()
       ? [
-          ...this.pages.slice(0, 2),
+          ...pages.slice(0, 2),
           { key: 'admin', label: 'Manage bookings', path: '/admin' },
-          ...this.pages.slice(2),
+          ...pages.slice(2),
         ]
-      : this.pages,
-  );
+      : pages;
+  });
 
   protected readonly activeKey = computed(() => {
     const url = this.router.parseUrl(this.currentUrl());
@@ -85,6 +93,7 @@ export class MobileMenu {
     if (route === 'schedule')
       return url.queryParams['service'] === 'general' ? 'contact' : 'schedule';
     if (['login', 'forgot-password', 'reset-password'].includes(route)) return 'account';
+    if (LIFT_CLUB_SEGMENTS.includes(route)) return 'lift-club';
     return route;
   });
 

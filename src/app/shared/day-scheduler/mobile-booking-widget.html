@@ -1,157 +1,196 @@
 <section class="widget" aria-label="Book a lift club timeslot" [attr.aria-busy]="loading()">
-  <header class="widget__date">
-    <button
-      type="button"
-      class="widget__step"
-      aria-label="Previous day"
-      [disabled]="dayIndex() === 0"
-      (click)="stepDay(-1)"
+  <!--
+    The booking times and the events share this space. The booking content sets its height
+    and the events fill it, scrolling inside, so the widget doesn't jump. The hidden one is inert.
+  -->
+  <div class="widget__views">
+    <div
+      class="widget__booking view"
+      [class.view--hidden]="view() === 'events'"
+      [attr.inert]="view() === 'events' ? '' : null"
     >
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M15 5 8 12l7 7" />
-      </svg>
-    </button>
-    <div class="widget__day" aria-live="polite">
-      <p class="widget__day-label">{{ day().label }}</p>
-      <h2 class="widget__day-full">{{ day().full }}</h2>
-    </div>
-    <button
-      type="button"
-      class="widget__step"
-      aria-label="Next day"
-      [disabled]="dayIndex() === days().length - 1"
-      (click)="stepDay(1)"
-    >
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="m9 5 7 7-7 7" />
-      </svg>
-    </button>
-  </header>
+      <header class="widget__date">
+        <button
+          type="button"
+          class="widget__step"
+          aria-label="Previous day"
+          [disabled]="dayIndex() === 0"
+          (click)="stepDay(-1)"
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M15 5 8 12l7 7" />
+          </svg>
+        </button>
+        <div class="widget__day" aria-live="polite">
+          <p class="widget__day-label">{{ day().label }}</p>
+          <h2 class="widget__day-full">{{ day().full }}</h2>
+        </div>
+        <button
+          type="button"
+          class="widget__step"
+          aria-label="Next day"
+          [disabled]="dayIndex() === days().length - 1"
+          (click)="stepDay(1)"
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="m9 5 7 7-7 7" />
+          </svg>
+        </button>
+      </header>
 
-  <div class="widget__stage">
-    <app-analog-clock class="widget__clock" />
-    <div class="widget__summary">
-      @if (selected(); as slot) {
-        <p class="widget__eyebrow">Your departure</p>
-        <p class="widget__time">{{ slot.range }}</p>
-        <p class="widget__state widget__state--{{ slot.state }}">
+      <div class="widget__stage">
+        <app-analog-clock class="widget__clock" />
+        <div class="widget__summary">
+          @if (selected(); as slot) {
+            <p class="widget__eyebrow">Your departure</p>
+            <p class="widget__time">{{ slot.range }}</p>
+            <p class="widget__state widget__state--{{ slot.state }}">
+              @switch (slot.state) {
+                @case ('mine') {
+                  Booked · {{ slot.booking?.passengers }}
+                  {{ slot.booking?.passengers === 1 ? 'traveller' : 'travellers' }}
+                }
+                @case ('taken') {
+                  Slot taken
+                }
+                @case ('past') {
+                  Elapsed
+                }
+                @default {
+                  Available · SAST
+                }
+              }
+            </p>
+          }
+        </div>
+        <img
+          class="widget__car"
+          src="volvo_PNG78.png"
+          alt=""
+          width="162"
+          height="84"
+          decoding="async"
+        />
+      </div>
+
+      @if (loadError()) {
+        <div class="widget__error" role="alert">
+          {{ loadError() }} <button type="button" (click)="retry.emit()">Retry</button>
+        </div>
+      }
+
+      <div class="widget__slots">
+        <div class="widget__slots-head">
+          <p class="widget__eyebrow" id="widget-times">Choose a time</p>
+          <p class="widget__count">
+            {{
+              loading()
+                ? 'Loading…'
+                : openCount() + (openCount() === 1 ? ' slot open' : ' slots open')
+            }}
+          </p>
+        </div>
+        <div class="widget__carousel-row">
+          <button
+            type="button"
+            class="widget__nudge"
+            aria-label="Earlier time"
+            [disabled]="selected()?.hour === slots()[0]?.hour"
+            (click)="stepHour(-1)"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M15 5 8 12l7 7" />
+            </svg>
+          </button>
+          <div #carousel class="widget__carousel" role="group" aria-labelledby="widget-times">
+            @for (slot of slots(); track slot.hour) {
+              <button
+                type="button"
+                class="chip chip--{{ slot.state }}"
+                [class.is-selected]="selected()?.hour === slot.hour"
+                [attr.data-hour]="slot.hour"
+                [attr.aria-pressed]="selected()?.hour === slot.hour"
+                [attr.aria-label]="slot.range + ', ' + stateLabel(slot)"
+                (click)="choose(slot)"
+              >
+                <span class="chip__time">{{ slot.label }}</span>
+                <span class="chip__state">{{ stateLabel(slot) }}</span>
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="widget__nudge"
+            aria-label="Later time"
+            [disabled]="selected()?.hour === slots()[slots().length - 1]?.hour"
+            (click)="stepHour(1)"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="m9 5 7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      @if (selected()?.state === 'mine') {
+        <app-booked-marker class="widget__marker" />
+      }
+
+      <p class="widget__message" role="status">{{ message() }}</p>
+
+      <button type="button" class="widget__cta" [disabled]="!canBook()" (click)="confirm()">
+        @if (selected(); as slot) {
           @switch (slot.state) {
             @case ('mine') {
-              Booked · {{ slot.booking?.passengers }}
-              {{ slot.booking?.passengers === 1 ? 'traveller' : 'travellers' }}
+              Edit my booking
             }
             @case ('taken') {
-              Slot taken
+              This slot is taken
             }
             @case ('past') {
-              Elapsed
+              This slot has elapsed
             }
             @default {
-              Available · SAST
+              Reserve {{ slot.range }}
             }
           }
-        </p>
-      }
+        }
+      </button>
+      <p class="widget__note">One hour, reserved for you. Up to 3 travellers.</p>
     </div>
-    <img
-      class="widget__car"
-      src="volvo_PNG78.png"
-      alt=""
-      width="162"
-      height="84"
-      decoding="async"
+    <app-event-browser
+      class="widget__events view"
+      [class.view--hidden]="view() !== 'events'"
+      [attr.inert]="view() !== 'events' ? '' : null"
+      [active]="view() === 'events'"
+      (back)="backToTimes.emit()"
     />
   </div>
 
-  @if (loadError()) {
-    <div class="widget__error" role="alert">
-      {{ loadError() }} <button type="button" (click)="retry.emit()">Retry</button>
-    </div>
-  }
-
-  <div class="widget__slots">
-    <div class="widget__slots-head">
-      <p class="widget__eyebrow" id="widget-times">Choose a time</p>
-      <p class="widget__count">
-        {{
-          loading() ? 'Loading…' : openCount() + (openCount() === 1 ? ' slot open' : ' slots open')
-        }}
-      </p>
-    </div>
-    <div class="widget__carousel-row">
-      <button
-        type="button"
-        class="widget__nudge"
-        aria-label="Earlier time"
-        [disabled]="selected()?.hour === slots()[0]?.hour"
-        (click)="stepHour(-1)"
-      >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-          <path d="M15 5 8 12l7 7" />
-        </svg>
-      </button>
-      <div #carousel class="widget__carousel" role="group" aria-labelledby="widget-times">
-        @for (slot of slots(); track slot.hour) {
-          <button
-            type="button"
-            class="chip chip--{{ slot.state }}"
-            [class.is-selected]="selected()?.hour === slot.hour"
-            [attr.data-hour]="slot.hour"
-            [attr.aria-pressed]="selected()?.hour === slot.hour"
-            [attr.aria-label]="slot.range + ', ' + stateLabel(slot)"
-            (click)="choose(slot)"
-          >
-            <span class="chip__time">{{ slot.label }}</span>
-            <span class="chip__state">{{ stateLabel(slot) }}</span>
-          </button>
-        }
-      </div>
-      <button
-        type="button"
-        class="widget__nudge"
-        aria-label="Later time"
-        [disabled]="selected()?.hour === slots()[slots().length - 1]?.hour"
-        (click)="stepHour(1)"
-      >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-          <path d="m9 5 7 7-7 7" />
-        </svg>
-      </button>
-    </div>
+  <div class="widget__actions">
+    <button
+      type="button"
+      class="events-toggle widget__action"
+      data-events-toggle
+      [attr.aria-pressed]="view() === 'events'"
+      (click)="toggleEvents.emit()"
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="2.5" y="3.5" width="11" height="10" rx="1.5" />
+        <path d="M2.5 7h11M5.5 2v3M10.5 2v3" />
+      </svg>
+      Events
+    </button>
+    <button
+      type="button"
+      class="see-reviews widget__action"
+      data-see-reviews
+      (click)="seeReviews.emit()"
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M2 6.5v3M5 4v8M8 2v12M11 4.5v7M14 6.5v3" />
+      </svg>
+      See reviews
+    </button>
   </div>
-
-  @if (selected()?.state === 'mine') {
-    <app-booked-marker class="widget__marker" />
-  }
-
-  <p class="widget__message" role="status">{{ message() }}</p>
-
-  <button type="button" class="widget__cta" [disabled]="!canBook()" (click)="confirm()">
-    @if (selected(); as slot) {
-      @switch (slot.state) {
-        @case ('mine') {
-          Edit my booking
-        }
-        @case ('taken') {
-          This slot is taken
-        }
-        @case ('past') {
-          This slot has elapsed
-        }
-        @default {
-          Reserve {{ slot.range }}
-        }
-      }
-    }
-  </button>
-  <p class="widget__note">One hour, reserved for you. Up to 3 travellers.</p>
-  <button
-    type="button"
-    class="see-reviews widget__reviews"
-    data-see-reviews
-    (click)="seeReviews.emit()"
-  >
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6.5v3M5 4v8M8 2v12M11 4.5v7M14 6.5v3" /></svg>
-    See reviews
-  </button>
 </section>

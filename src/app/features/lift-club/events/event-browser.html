@@ -1,0 +1,104 @@
+<section class="events" [attr.aria-labelledby]="id + '-heading'">
+  <header class="events__head">
+    <div>
+      <p class="eyebrow">What’s on</p>
+      <h3 class="events__title" [id]="id + '-heading'" #heading tabindex="-1" data-events-heading>
+        Events
+      </h3>
+    </div>
+    <button type="button" class="events__back" (click)="back.emit()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" /></svg>
+      Back to booking times
+    </button>
+  </header>
+
+  <div class="events__search">
+    <label class="sr-only" [for]="id + '-search'">Search events</label>
+    <svg class="events__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4.5 4.5" />
+    </svg>
+    <input
+      #search
+      type="search"
+      class="events__search-input"
+      [id]="id + '-search'"
+      placeholder="Search events"
+      autocomplete="off"
+      enterkeyhint="search"
+      maxlength="100"
+      [value]="store.query()"
+      [attr.aria-describedby]="id + '-count'"
+      (input)="setQuery($event)"
+      (keydown.escape)="clearOnEscape($event)"
+    />
+  </div>
+  <p class="events__count" [id]="id + '-count'" role="status">
+    @if (store.results(); as results) {
+      @if (store.events()!.length) {
+        {{ count(results) }}
+      }
+    }
+  </p>
+
+  <div class="events__scroll" [attr.aria-busy]="store.loading()">
+    @if (store.loadFailed()) {
+      <p class="events__state" role="alert">
+        The events couldn’t be loaded.
+        <button type="button" class="events__link" (click)="store.load()">Try again</button>
+      </p>
+    } @else if (store.results(); as results) {
+      @if (!store.events()!.length) {
+        <p class="events__state">No events have been published yet. Please check back soon.</p>
+      } @else if (!results.length) {
+        <p class="events__state">
+          No events match “{{ store.query().trim() }}”.
+          <button type="button" class="events__link" (click)="clearSearch()">Clear search</button>
+        </p>
+      } @else {
+        <!-- role="list": Safari drops list semantics when list-style is none. -->
+        <ul class="events__grid" role="list" [attr.aria-labelledby]="id + '-heading'">
+          @for (event of results; track event.id; let i = $index) {
+            <li class="event" [style.--i]="i">
+              <img
+                class="event__image"
+                [src]="store.imageUrl(event)"
+                alt=""
+                width="640"
+                height="400"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="event__body">
+                <h4 class="event__title">
+                  <a [href]="event.url" target="_blank" rel="noopener noreferrer"
+                    >{{ event.title }}<span class="sr-only"> (opens in a new tab)</span
+                    ><svg class="event__external" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" /></svg
+                  ></a>
+                </h4>
+                <p class="event__description">{{ event.description }}</p>
+                @if (event.attendees.length) {
+                  <ul class="event__attendees" role="list" aria-label="Attending">
+                    @for (attendee of attendees(event); track $index) {
+                      <li
+                        class="event__avatar"
+                        [style.--avatar]="attendee.colour"
+                        [attr.title]="attendee.name"
+                      >
+                        <span aria-hidden="true">{{ attendee.initials }}</span>
+                        <span class="sr-only">{{ attendee.name }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <p class="events__state">Loading events…</p>
+    }
+  </div>
+</section>

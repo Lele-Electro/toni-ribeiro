@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { EntryContext } from '../../core/entry-context';
 import { Navbar } from './navbar';
 
 @Component({ template: '' })
@@ -13,16 +14,19 @@ describe('Navbar', () => {
   let router: Router;
   const user = signal<{ isAdmin?: boolean } | null>(null);
   const auth = { isAuthenticated: signal(false), user, logout: vi.fn() };
+  const homeDisabled = signal(false);
 
   beforeEach(async () => {
     auth.isAuthenticated.set(false);
     user.set(null);
     auth.logout.mockReset();
+    homeDisabled.set(false);
     TestBed.configureTestingModule({
       imports: [Navbar],
       providers: [
         provideRouter([{ path: '**', component: Destination }]),
         { provide: AuthService, useValue: auth },
+        { provide: EntryContext, useValue: { homeDisabled } },
       ],
     });
     router = TestBed.inject(Router);
@@ -53,6 +57,8 @@ describe('Navbar', () => {
 
   it.each([
     ['/lift-club', 'Private Lift Club'],
+    ['/events', 'Private Lift Club'],
+    ['/reviews?campaign=email', 'Private Lift Club'],
     ['/referral-business', 'Other'],
     ['/login?returnUrl=%2Fschedule', 'Log in'],
     ['/forgot-password', 'Log in'],
@@ -116,6 +122,52 @@ describe('Navbar', () => {
     expect(logout.textContent?.trim()).toBe('Log out');
     logout.click();
     expect(auth.logout).toHaveBeenCalledOnce();
+  });
+
+  it('disables every way Home for visitors who came to the lift club from outside', async () => {
+    await router.navigateByUrl('/lift-club');
+    homeDisabled.set(true);
+    await fixture.whenStable();
+
+    const home = element.querySelector<HTMLElement>('.navbar__links > li:first-child > *')!;
+    expect(home.tagName).toBe('SPAN');
+    expect(home.textContent!.trim()).toBe('Home');
+    expect(home.getAttribute('aria-disabled')).toBe('true');
+    expect(home.classList.contains('is-disabled')).toBe(true);
+    expect(home.hasAttribute('href')).toBe(false);
+    expect(home.hasAttribute('tabindex')).toBe(false);
+    home.click();
+    home.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+    expect(router.url).toBe('/lift-club');
+
+    // The phone bar's brand, the menu's brand and its Home item lead nowhere either.
+    const menu = element.querySelector('app-mobile-menu')!;
+    const brands = [...menu.querySelectorAll<HTMLElement>('.bar__brand')];
+    expect(brands).toHaveLength(2);
+    for (const brand of brands) {
+      expect(brand.tagName).toBe('SPAN');
+      expect(brand.getAttribute('aria-disabled')).toBe('true');
+    }
+    const items = [...menu.querySelectorAll<HTMLElement>('.overlay__link')];
+    expect(items[0].textContent!.trim()).toBe('Home');
+    expect(items[0].classList.contains('is-disabled')).toBe(true);
+    expect(items[0].hasAttribute('href')).toBe(false);
+    expect(items[0].querySelector('.overlay__soon')).toBeNull();
+    expect(items[1].getAttribute('href')).toBe('/lift-club');
+
+    // Signing out stays on the lift club rather than going Home.
+    auth.isAuthenticated.set(true);
+    await fixture.whenStable();
+    element.querySelector<HTMLButtonElement>('.navbar__account button')!.click();
+    expect(auth.logout).toHaveBeenCalledWith('/lift-club');
+
+    homeDisabled.set(false);
+    await fixture.whenStable();
+    expect(element.querySelector('.navbar__links > li:first-child > a')!.getAttribute('href')).toBe(
+      '/',
+    );
+    expect(menu.querySelector('.bar__brand')!.getAttribute('href')).toBe('/');
   });
 
   it('uses the solid landing appearance by default and accepts the frosted appearance', async () => {

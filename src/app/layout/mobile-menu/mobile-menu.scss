@@ -38,6 +38,12 @@
   color: #193d33;
 }
 
+// Where Home is disabled (see EntryContext), the brand is plain text that looks inactive.
+.bar__brand.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .bar__brand {
   display: flex;
   align-items: center;

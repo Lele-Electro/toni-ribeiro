@@ -2,6 +2,7 @@
   [appearance]="appearance()"
   [authenticated]="hydrated() && auth.isAuthenticated()"
   [admin]="isAdmin()"
+  [homeDisabled]="homeDisabled()"
   (logout)="logout()"
 />
 <nav
@@ -12,13 +13,17 @@
 >
   <ul class="navbar__links">
     <li>
-      <a
-        class="navbar__link"
-        routerLink="/"
-        [class.is-active]="activeSection() === 'home'"
-        [attr.aria-current]="activeSection() === 'home' ? 'page' : null"
-        >Home</a
-      >
+      @if (homeDisabled()) {
+        <span class="navbar__link is-disabled" aria-disabled="true">Home</span>
+      } @else {
+        <a
+          class="navbar__link"
+          routerLink="/"
+          [class.is-active]="activeSection() === 'home'"
+          [attr.aria-current]="activeSection() === 'home' ? 'page' : null"
+          >Home</a
+        >
+      }
     </li>
     <li>
       <a
@@ -56,9 +61,12 @@
                 item.label
               }}</span>
             } @else {
-              <a [routerLink]="item.path" routerLinkActive="is-active" ariaCurrentWhenActive="page">{{
-                item.label
-              }}</a>
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="is-active"
+                ariaCurrentWhenActive="page"
+                >{{ item.label }}</a
+              >
             }
           </li>
         }

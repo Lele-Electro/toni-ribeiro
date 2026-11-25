@@ -5,6 +5,19 @@
   <div class="hero-brand">
     <h1 class="hero-brand__name">Toni <br />Ribeiro</h1>
     <p class="hero-brand__line">Tailored Services</p>
+    <a class="hero-brand__linkedin" [href]="linkedInUrl" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <rect class="hero-brand__linkedin-badge" x="1" y="1" width="22" height="22" rx="4" />
+        <g class="hero-brand__linkedin-mark">
+          <circle cx="7.2" cy="7.1" r="1.6" />
+          <rect x="5.8" y="9.4" width="2.8" height="8.8" />
+          <path
+            d="M10.6 9.4h2.7v1.3c.5-.9 1.6-1.5 3-1.5 2.4 0 3.4 1.5 3.4 4.1v4.9h-2.8v-4.4c0-1.2-.4-2-1.5-2s-2 .8-2 2.1v4.3h-2.8z"
+          />
+        </g>
+      </svg>
+      <span>LinkedIn</span><span class="sr-only"> (opens in a new tab)</span>
+    </a>
   </div>
 
   <!-- White on the phone layout's green; the original green on the desktop's white. -->
@@ -40,7 +53,11 @@
       (pause)="playing.set(false)"
       (ended)="playing.set(false)"
     >
-      <source media="(max-width: 40rem)" src="create-1-mobile.webm" type='video/webm; codecs="vp9, opus"' />
+      <source
+        media="(max-width: 40rem)"
+        src="create-1-mobile.webm"
+        type='video/webm; codecs="vp9, opus"'
+      />
       <source media="(max-width: 40rem)" src="create-1-mobile.mp4" type="video/mp4" />
       <source src="create-1.webm" type='video/webm; codecs="vp9, opus"' />
       <source src="create-1.mp4" type="video/mp4" />

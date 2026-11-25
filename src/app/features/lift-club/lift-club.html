@@ -32,8 +32,9 @@
   </p>
 
   <!--
-    One card, two faces. "See reviews" swivels it to the voice reviews; both faces stay
-    mounted, so the booking table keeps its day, time and form while it is turned away.
+    One card, two faces. "See reviews" swivels it to the voice reviews (/reviews); both faces
+    stay mounted, so the booking table keeps its day, time and form while it is turned away.
+    The front shows the booking times (/lift-club) or the events (/events).
   -->
   <div
     class="schedule-picker flip-card"
@@ -42,8 +43,17 @@
     [class.is-measured]="cardHeight() !== null"
     [style.--card-height]="cardHeight() === null ? null : cardHeight() + 'px'"
   >
-    <div #front class="flip-card__face flip-card__face--front" [attr.inert]="showReviews() ? '' : null">
-      <app-day-scheduler class="flip-card__scheduler" (seeReviews)="flip(true)" />
+    <div
+      #front
+      class="flip-card__face flip-card__face--front"
+      [attr.inert]="showReviews() ? '' : null"
+    >
+      <app-day-scheduler
+        class="flip-card__scheduler"
+        [view]="frontView()"
+        (viewChange)="showFront($event)"
+        (seeReviews)="flip(true)"
+      />
     </div>
     <div
       #back

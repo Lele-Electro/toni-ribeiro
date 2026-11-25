@@ -12,14 +12,16 @@ export const serverRoutes: ServerRoute[] = [
   // These pages are the same for everyone, so they are rendered once at build time. That
   // also gives the static upload (npm run build:afrihost) real HTML for search engines.
   {
+    // The home page. While it is switched off (a redirect to /lift-club, see app.routes.ts)
+    // nothing is prerendered here; it is kept for when the page returns.
     path: '',
     renderMode: RenderMode.Prerender,
   },
-  {
-    // Shows today's dates and live availability: never built ahead of time.
-    path: 'lift-club',
-    renderMode: RenderMode.Server,
-  },
+  // The lift club shows today's dates and live availability: never built ahead of time.
+  // /events and /reviews are the same page, opened on those views.
+  { path: 'lift-club', renderMode: RenderMode.Server },
+  { path: 'events', renderMode: RenderMode.Server },
+  { path: 'reviews', renderMode: RenderMode.Server },
   {
     path: 'referral-business',
     renderMode: RenderMode.Prerender,

@@ -86,6 +86,45 @@ $green-deep: #142a20;
     line-height: 1.5;
     text-transform: uppercase;
   }
+
+  // Beneath the services line, in the brand's own colour.
+  &__linkedin {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    margin-top: clamp(0.25rem, 1dvh, 0.75rem);
+    color: inherit;
+    font-size: clamp(0.75rem, 1.05vw, 1.05rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    transition: opacity 160ms ease;
+
+    svg {
+      flex: none;
+      width: 1.4em;
+      height: 1.4em;
+    }
+
+    &:hover {
+      color: inherit;
+      opacity: 0.8;
+
+      span:first-of-type {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // The badge takes the text colour; the "in" is cut out in the background behind it.
+  &__linkedin-badge {
+    fill: currentColor;
+  }
+
+  &__linkedin-mark {
+    fill: #fff;
+  }
 }
 
 // Bottom left, on the same left edge as the name, clear of the services bar below.
@@ -315,7 +354,8 @@ $green-deep: #142a20;
     animation: none;
   }
 
-  .hero-video__play {
+  .hero-video__play,
+  .hero-brand__linkedin {
     transition: none;
   }
 
@@ -391,6 +431,15 @@ $green-deep: #142a20;
       br {
         display: none;
       }
+    }
+
+    &__linkedin {
+      margin-top: 0.35rem;
+      font-size: 0.8125rem;
+    }
+
+    &__linkedin-mark {
+      fill: $green;
     }
   }
 

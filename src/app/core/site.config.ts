@@ -4,3 +4,7 @@ export const SITE_NAME = 'Toni Ribeiro';
 export const CONTACT_EMAIL = 'privacy@toniribeiro.com';
 
 export const LEGAL_LAST_UPDATED = '27 October 2026';
+
+/** Toni's professional profile, linked from the home page and every Ribeiro email. */
+export const LINKEDIN_URL =
+  'https://www.linkedin.com/in/antonio-lebogang-ribeiro-de-souza-01a79256/';

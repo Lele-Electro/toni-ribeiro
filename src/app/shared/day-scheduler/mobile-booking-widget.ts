@@ -9,9 +9,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { LiftBooking } from '../../core/lift-bookings/lift-bookings.service';
+import { EventBrowser } from '../../features/lift-club/events/event-browser';
 import { AnalogClock } from '../analog-clock/analog-clock';
 import { BookedMarker } from '../booked-marker/booked-marker';
-import { SlotView } from './slot-view';
+import { SchedulerView, SlotView } from './slot-view';
 
 interface DayView {
   key: string;
@@ -23,11 +24,12 @@ interface DayView {
 /**
  * The phone layout of the lift club scheduler: one day at a time, a swipeable row of
  * hours and a single large action. It holds no booking state of its own; days, slots and
- * availability come from DayScheduler, which also owns the booking dialog.
+ * availability come from DayScheduler, which also owns the booking dialog and decides
+ * whether the events show in place of the booking times.
  */
 @Component({
   selector: 'app-mobile-booking-widget',
-  imports: [AnalogClock, BookedMarker],
+  imports: [AnalogClock, BookedMarker, EventBrowser],
   templateUrl: './mobile-booking-widget.html',
   styleUrl: './mobile-booking-widget.scss',
 })
@@ -38,10 +40,15 @@ export class MobileBookingWidget {
   readonly loading = input(false);
   readonly loadError = input('');
   readonly message = input('');
+  readonly view = input<SchedulerView>('times');
   readonly dateChange = output<string>();
   readonly book = output<{ hour: number; booking?: LiftBooking }>();
   readonly retry = output<void>();
   readonly seeReviews = output<void>();
+  /** The Events control was pressed. */
+  readonly toggleEvents = output<void>();
+  /** "Back to booking times" (or Escape) in the events. */
+  readonly backToTimes = output<void>();
 
   private readonly carousel = viewChild<ElementRef<HTMLElement>>('carousel');
   /** The hour the member tapped; null until then, so the first open slot is suggested. */

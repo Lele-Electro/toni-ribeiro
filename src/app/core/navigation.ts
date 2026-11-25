@@ -9,6 +9,12 @@ export const UNAVAILABLE_PATHS: readonly string[] = [
   '/terms',
 ];
 
+/**
+ * The lift club page's addresses: its booking times, its events and its voice reviews
+ * (features/lift-club/lift-club.routes.ts). Navigation treats them as one page.
+ */
+export const LIFT_CLUB_SEGMENTS: readonly string[] = ['lift-club', 'events', 'reviews'];
+
 /** Where members arrive after logging in: the lift club booking table. */
 export const AFTER_LOGIN_URL = '/lift-club';
 

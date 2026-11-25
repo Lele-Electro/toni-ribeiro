@@ -1,4 +1,5 @@
 import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   AdminAccount,
   AdminBooking,
@@ -10,6 +11,8 @@ import { httpErrorMessage } from '../../core/http-error-message';
 import { VoiceReviewsService } from '../../core/voice-reviews/voice-reviews.service';
 import { formatTime } from '../lift-club/voice-reviews/review-audio';
 import { SCHEDULE_TIME_ZONE, slotLabel } from '../../shared/day-scheduler/scheduler-time';
+import { AdminEvents } from './events/admin-events';
+import { PromotionalEmail } from './promotional-email/promotional-email';
 
 const DAY = new Intl.DateTimeFormat('en-ZA', {
   timeZone: SCHEDULE_TIME_ZONE,
@@ -26,11 +29,13 @@ const JOINED = new Intl.DateTimeFormat('en-ZA', {
 
 /**
  * The owner's page: every upcoming booking and every account, with the means to remove a
- * booking, delete an account or reset everything. Each destructive button asks once more
- * before it acts, because none of these can be undone.
+ * booking, delete an account or reset everything; the lift club's events; and the
+ * promotional email. Each destructive button, and Send, asks once more before it acts,
+ * because none of these can be undone.
  */
 @Component({
   selector: 'app-admin',
+  imports: [RouterLink, AdminEvents, PromotionalEmail],
   templateUrl: './admin.html',
   styleUrl: './admin.scss',
   host: {

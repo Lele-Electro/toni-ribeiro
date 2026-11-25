@@ -4,10 +4,17 @@
       <span class="eyebrow">Owner tools</span>
       <h1>Manage bookings</h1>
       <p class="lead">
-        Remove a booking to free its slot, take down a voice review, or delete an account with
-        everything stored against it. Nothing here can be undone, and members are not emailed
-        about it.
+        Remove a booking to free its slot, manage the lift club’s events, send the promotional
+        email, take down a voice review, or delete an account with everything stored against it.
+        Removals can’t be undone, and members are not emailed about them.
       </p>
+      <nav class="admin__nav" aria-label="Sections of this page">
+        <a routerLink="/admin" fragment="bookings">Bookings</a>
+        <a routerLink="/admin" fragment="events">Events</a>
+        <a routerLink="/admin" fragment="promotional-email">Promotional email</a>
+        <a routerLink="/admin" fragment="reviews">Voice reviews</a>
+        <a routerLink="/admin" fragment="accounts">Accounts</a>
+      </nav>
     </header>
 
     @if (notice(); as message) {
@@ -25,7 +32,7 @@
     } @else if (!overview()) {
       <p class="admin__empty">Loading…</p>
     } @else {
-      <section class="card admin__card" aria-labelledby="admin-bookings">
+      <section class="card admin__card" id="bookings" aria-labelledby="admin-bookings">
         <h2 id="admin-bookings">Upcoming bookings ({{ bookings().length }})</h2>
         @if (bookings().length) {
           <ul class="admin__list">
@@ -47,11 +54,15 @@
                     {{ booking.dropoff?.address || 'No drop-off' }}
                   </p>
                   <p class="admin__muted">
-                    {{ booking.passengers }} {{ booking.passengers === 1 ? 'traveller' : 'travellers' }}
+                    {{ booking.passengers }}
+                    {{ booking.passengers === 1 ? 'traveller' : 'travellers' }}
                     @if (booking.whatsapp) {
                       · WhatsApp {{ booking.whatsapp }}
                     }
-                    · {{ booking.status === 'confirmed' ? 'Confirmation sent' : 'Confirmation pending' }}
+                    ·
+                    {{
+                      booking.status === 'confirmed' ? 'Confirmation sent' : 'Confirmation pending'
+                    }}
                   </p>
                 </div>
                 <div class="admin__actions">
@@ -118,7 +129,11 @@
         }
       </section>
 
-      <section class="card admin__card" aria-labelledby="admin-reviews">
+      <app-admin-events />
+
+      <app-promotional-email />
+
+      <section class="card admin__card" id="reviews" aria-labelledby="admin-reviews">
         <h2 id="admin-reviews">Voice reviews ({{ reviews().length }})</h2>
         @if (reviews().length) {
           <p class="admin__muted admin__hint">
@@ -183,7 +198,7 @@
         }
       </section>
 
-      <section class="card admin__card" aria-labelledby="admin-accounts">
+      <section class="card admin__card" id="accounts" aria-labelledby="admin-accounts">
         <h2 id="admin-accounts">Accounts ({{ accounts().length }})</h2>
         <ul class="admin__list">
           @for (account of accounts(); track account.userId) {
@@ -237,9 +252,9 @@
       <section class="card admin__card admin__reset" aria-labelledby="admin-reset">
         <h2 id="admin-reset">Reset everything</h2>
         <p>
-          Deletes all {{ memberCount() }} member
-          {{ memberCount() === 1 ? 'account' : 'accounts' }}, every booking and every voice review,
-          including your own. Your owner account stays so that you can still log in.
+          Deletes all {{ memberCount() }} member {{ memberCount() === 1 ? 'account' : 'accounts' }},
+          every booking and every voice review, including your own. Your owner account stays so that
+          you can still log in.
         </p>
         @if (confirming() === 'reset') {
           <p class="admin__question">This cannot be undone. Delete everything?</p>

@@ -67,10 +67,11 @@ export class AuthService {
     );
   }
 
-  logout(): void {
+  /** Signs out and goes to the home page, or to `redirectTo` (an in-app URL). */
+  logout(redirectTo = '/'): void {
     this.endSession();
     this.googleIdentity.disableAutoSelect();
-    void this.router.navigateByUrl('/');
+    void this.router.navigateByUrl(redirectTo);
   }
 
   /** Called when the token runs out or the API rejects it. */

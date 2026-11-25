@@ -113,6 +113,14 @@ describe('MobileMenu', () => {
     expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe(
       'Private Lift Club',
     );
+    // /events and /reviews are the lift club page too.
+    for (const url of ['/events', '/reviews']) {
+      await router.navigateByUrl(url);
+      await settle();
+      expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe(
+        'Private Lift Club',
+      );
+    }
   });
 
   it('offers Log out to signed-in members', async () => {

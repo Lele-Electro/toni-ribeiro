@@ -33,6 +33,38 @@ svg path {
   color: #193d33;
 }
 
+// The booking content sets the height; the events lie over it and scroll inside, so the
+// widget keeps its size when the views cross-fade. The hidden one is inert as well.
+.widget__views {
+  position: relative;
+  min-width: 0;
+}
+
+.widget__booking {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.widget__events {
+  position: absolute;
+  inset: 0;
+}
+
+.view {
+  transition:
+    opacity 260ms ease 90ms,
+    visibility 0s linear 0s;
+}
+
+.view--hidden {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 160ms ease,
+    visibility 0s linear 160ms;
+}
+
 .widget__date {
   display: grid;
   grid-template-columns: 3rem minmax(0, 1fr) 3rem;
@@ -345,16 +377,25 @@ svg path {
   text-align: center;
 }
 
-// Smaller than the Reserve button (3.5rem, full width) but still a 44px target. Look and
-// pulse: .see-reviews in styles/_components.scss.
-.widget__reviews {
-  justify-self: center;
+// Below a divider, as on the desktop table: Events and See reviews, showing with either
+// view. Smaller than the Reserve button (3.5rem, full width) but still 44px targets. Look
+// and pulse: .events-toggle and .see-reviews in styles/_components.scss.
+.widget__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgb(67 94 79 / 15%);
+}
+
+.widget__action {
   min-height: 2.75rem;
-  margin-top: -0.35rem;
   padding: 0 1.25rem;
   font-size: 0.875rem;
 
-  svg path {
+  svg path,
+  svg rect {
     stroke-width: 2;
   }
 }
@@ -368,7 +409,9 @@ svg path {
   .chip,
   .widget__step,
   .widget__nudge,
-  .widget__cta {
+  .widget__cta,
+  .view,
+  .view--hidden {
     transition: none;
   }
 

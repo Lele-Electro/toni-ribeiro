@@ -18,7 +18,8 @@ import {
 } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
-import { isUnavailable } from '../../core/navigation';
+import { EntryContext } from '../../core/entry-context';
+import { LIFT_CLUB_SEGMENTS, isUnavailable } from '../../core/navigation';
 import { MobileMenu } from '../mobile-menu/mobile-menu';
 
 @Component({
@@ -41,6 +42,7 @@ export class Navbar {
   private readonly otherToggle = viewChild<ElementRef<HTMLButtonElement>>('otherToggle');
   private readonly currentUrl = signal(this.router.url);
   protected readonly auth = inject(AuthService);
+  private readonly entry = inject(EntryContext);
   protected readonly menuOpen = signal(false);
   /** Pages under "Other"; those without content yet are shown but can't be opened. */
   private readonly pages = [
@@ -59,14 +61,16 @@ export class Navbar {
       : this.pages,
   );
   /** With nothing to open under it, the "Other" button itself is disabled. */
-  protected readonly otherDisabled = computed(() => this.otherItems().every((item) => item.disabled));
+  protected readonly otherDisabled = computed(() =>
+    this.otherItems().every((item) => item.disabled),
+  );
   protected readonly contactDisabled = isUnavailable('/schedule');
   protected readonly activeSection = computed(() => {
     const url = this.router.parseUrl(this.currentUrl());
     const route =
       url.root.children[PRIMARY_OUTLET]?.segments.map((segment) => segment.path).join('/') ?? '';
     if (route === '') return 'home';
-    if (route === 'lift-club') return 'lift-club';
+    if (LIFT_CLUB_SEGMENTS.includes(route)) return 'lift-club';
     if (route === 'schedule' && url.queryParams['service'] === 'general') return 'contact';
     if (['login', 'forgot-password', 'reset-password'].includes(route)) return 'account';
     return 'other';
@@ -76,6 +80,12 @@ export class Navbar {
    * wait until after hydration so the browser's first render matches the server's HTML.
    */
   protected readonly hydrated = signal(false);
+  /**
+   * Home is disabled on the lift club for visitors who arrived there from outside the site
+   * (see EntryContext). Known only in the browser, so it waits for hydration like the
+   * session-dependent links.
+   */
+  protected readonly homeDisabled = computed(() => this.hydrated() && this.entry.homeDisabled());
 
   constructor() {
     afterNextRender(() => this.hydrated.set(true));
@@ -111,6 +121,7 @@ export class Navbar {
 
   protected logout(): void {
     this.closeMenu();
-    this.auth.logout();
+    // Where Home is disabled, signing out mustn't take the visitor there either.
+    this.auth.logout(this.homeDisabled() ? this.router.url : '/');
   }
 }

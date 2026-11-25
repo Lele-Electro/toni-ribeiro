@@ -1,5 +1,9 @@
 <div class="bar" [class.bar--frosted]="appearance() === 'frosted'">
-  <a class="bar__brand" routerLink="/">Toni Ribeiro</a>
+  @if (homeDisabled()) {
+    <span class="bar__brand is-disabled" aria-disabled="true">Toni Ribeiro</span>
+  } @else {
+    <a class="bar__brand" routerLink="/">Toni Ribeiro</a>
+  }
   <button
     #trigger
     type="button"
@@ -25,7 +29,11 @@
   (click)="onOverlayClick($event)"
 >
   <div class="overlay__bar">
-    <a class="bar__brand" routerLink="/" (click)="close()">Toni Ribeiro</a>
+    @if (homeDisabled()) {
+      <span class="bar__brand is-disabled" aria-disabled="true">Toni Ribeiro</span>
+    } @else {
+      <a class="bar__brand" routerLink="/" (click)="close()">Toni Ribeiro</a>
+    }
     <!-- Sits exactly over the hamburger, so the bars appear to turn into the X. -->
     <button
       type="button"
@@ -45,8 +53,11 @@
         <li [style.--i]="index">
           @if (item.disabled) {
             <span class="overlay__link is-disabled" aria-disabled="true"
-              >{{ item.label }} <small class="overlay__soon">Soon</small></span
-            >
+              >{{ item.label }}
+              @if (item.soon) {
+                <small class="overlay__soon">Soon</small>
+              }
+            </span>
           } @else {
             <a
               class="overlay__link"

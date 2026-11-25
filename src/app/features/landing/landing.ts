@@ -1,5 +1,6 @@
 import { Component, ElementRef, signal, viewChild } from '@angular/core';
 import { Navbar } from '../../layout/navbar/navbar';
+import { LINKEDIN_URL } from '../../core/site.config';
 
 @Component({
   selector: 'app-landing',
@@ -14,6 +15,8 @@ import { Navbar } from '../../layout/navbar/navbar';
 })
 export class Landing {
   private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
+
+  protected readonly linkedInUrl = LINKEDIN_URL;
 
   // Add another entry here to include it in the scrolling strip.
   protected readonly roles = [

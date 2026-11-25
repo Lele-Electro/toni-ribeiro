@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AdminOverview, AdminService } from '../../core/admin/admin.service';
 import { VoiceReviewsService } from '../../core/voice-reviews/voice-reviews.service';
 import { Admin } from './admin';
@@ -13,6 +14,14 @@ describe('Admin', () => {
     deleteAccount: vi.fn(),
     reset: vi.fn(),
     removeVoiceReview: vi.fn(),
+    // The Events and Promotional email sections.
+    events: vi.fn(),
+    eventImage: vi.fn(),
+    saveEvent: vi.fn(),
+    publishEvent: vi.fn(),
+    deleteEvent: vi.fn(),
+    previewPromotionalEmail: vi.fn(),
+    sendPromotionalEmail: vi.fn(),
   };
   const data = (): AdminOverview => ({
     accounts: [
@@ -63,13 +72,17 @@ describe('Admin', () => {
   beforeEach(async () => {
     Object.values(api).forEach((fn) => fn.mockReset().mockResolvedValue(undefined));
     api.overview.mockResolvedValue(data());
+    api.events.mockResolvedValue([]);
     TestBed.configureTestingModule({
       imports: [Admin],
       providers: [
+        provideRouter([]),
         { provide: AdminService, useValue: api },
         {
           provide: VoiceReviewsService,
-          useValue: { audioUrl: (r: { id: string; revision: number }) => `/audio/${r.id}?v=${r.revision}` },
+          useValue: {
+            audioUrl: (r: { id: string; revision: number }) => `/audio/${r.id}?v=${r.revision}`,
+          },
         },
       ],
     });
@@ -138,8 +151,25 @@ describe('Admin', () => {
     api.overview.mockResolvedValue({ ...data(), voiceReviews: [] });
     await click('Yes, remove', card('admin-reviews'));
     expect(api.removeVoiceReview).toHaveBeenCalledWith('review-1');
-    expect(element.querySelector('[role="status"]')!.textContent).toContain('Removed the voice review from Ann K.');
+    expect(element.querySelector('[role="status"]')!.textContent).toContain(
+      'Removed the voice review from Ann K.',
+    );
     expect(card('admin-reviews').textContent).toContain('No voice reviews yet');
+  });
+
+  it('links to each section, the new Events and Promotional email included', () => {
+    const links = [...element.querySelectorAll<HTMLAnchorElement>('.admin__nav a')];
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/admin#bookings',
+      '/admin#events',
+      '/admin#promotional-email',
+      '/admin#reviews',
+      '/admin#accounts',
+    ]);
+    for (const id of ['bookings', 'events', 'promotional-email', 'reviews', 'accounts']) {
+      expect(element.querySelector(`#${id}`)).not.toBeNull();
+    }
+    expect(api.events).toHaveBeenCalledOnce();
   });
 
   it('resets everything only after confirmation', async () => {

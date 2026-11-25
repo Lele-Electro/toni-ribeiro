@@ -1,3 +1,5 @@
+@use '../../../../styles/avatar';
+
 // The panel mirrors the booking table it sits behind: the desktop .scheduler on wide
 // screens and the mobile .widget on phones (see day-scheduler.scss, mobile-booking-widget.scss).
 :host {
@@ -131,18 +133,9 @@ svg {
   animation: row-in 460ms var(--ease-out) calc(380ms + var(--i) * 70ms) both;
 }
 
+// Shared with the event attendees' circles (styles/_avatar.scss).
 .review__avatar {
-  display: grid;
-  place-items: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 50%;
-  background: var(--avatar, #1b4f43);
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  line-height: 1;
+  @include avatar.initials-avatar(3.25rem, 0.95rem);
 }
 
 // --avatar: each reviewer's own colour (avatar-colours.ts), set in the template.

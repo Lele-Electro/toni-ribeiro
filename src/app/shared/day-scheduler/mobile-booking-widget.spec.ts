@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { EventsService } from '../../core/events/events.service';
 import { LiftBooking } from '../../core/lift-bookings/lift-bookings.service';
+import { EventStore } from '../../features/lift-club/events/event-store';
 import { MobileBookingWidget } from './mobile-booking-widget';
 import { SLOT_HOURS, hourLabel, scheduleDays, slotLabel } from './scheduler-time';
 import { SlotView } from './slot-view';
@@ -26,7 +28,14 @@ describe('MobileBookingWidget', () => {
   const cta = () => element.querySelector<HTMLButtonElement>('.widget__cta')!;
 
   beforeEach(async () => {
-    TestBed.configureTestingModule({ imports: [MobileBookingWidget] });
+    TestBed.configureTestingModule({
+      imports: [MobileBookingWidget],
+      // DayScheduler provides the events in the app.
+      providers: [
+        EventStore,
+        { provide: EventsService, useValue: { list: async () => [], imageUrl: () => '' } },
+      ],
+    });
     fixture = TestBed.createComponent(MobileBookingWidget);
     element = fixture.nativeElement;
     await set({
@@ -37,6 +46,36 @@ describe('MobileBookingWidget', () => {
   });
 
   afterEach(() => fixture.destroy());
+
+  it('offers Events beside See reviews, and shows the events in place of the booking times', async () => {
+    const actions = [...element.querySelectorAll<HTMLButtonElement>('.widget__actions button')];
+    expect(actions.map((button) => button.textContent!.trim())).toEqual(['Events', 'See reviews']);
+    const toggles: string[] = [];
+    fixture.componentInstance.toggleEvents.subscribe(() => toggles.push('events'));
+    fixture.componentInstance.backToTimes.subscribe(() => toggles.push('times'));
+    actions[0].click();
+    expect(toggles).toEqual(['events']);
+
+    const booking = element.querySelector<HTMLElement>('.widget__booking')!;
+    const events = element.querySelector<HTMLElement>('.widget__events')!;
+    expect(booking.hasAttribute('inert')).toBe(false);
+    expect(events.hasAttribute('inert')).toBe(true);
+    chip(9).click();
+    await set({ view: 'events' });
+    expect(booking.hasAttribute('inert')).toBe(true);
+    expect(booking.classList.contains('view--hidden')).toBe(true);
+    expect(events.hasAttribute('inert')).toBe(false);
+    expect(actions[0].getAttribute('aria-pressed')).toBe('true');
+    // See reviews stays available from the events.
+    expect(element.querySelector('.widget__actions [data-see-reviews]')).not.toBeNull();
+    events.querySelector<HTMLButtonElement>('.events__back')!.click();
+    expect(toggles).toEqual(['events', 'times']);
+
+    // The hour chosen before the switch is still chosen after it.
+    await set({ view: 'times' });
+    expect(chip(9).getAttribute('aria-pressed')).toBe('true');
+    expect(booking.hasAttribute('inert')).toBe(false);
+  });
 
   it('shows the current day and steps between days within the seven-day window', async () => {
     const [previous, next] = element.querySelectorAll<HTMLButtonElement>('.widget__step');

@@ -1,0 +1,286 @@
+<section class="card events" id="events" aria-labelledby="admin-events">
+  <div class="events__head">
+    <h2 id="admin-events">Events ({{ events()?.length ?? 0 }})</h2>
+    @if (!editing()) {
+      <button type="button" class="btn btn--primary btn--sm" (click)="startNew()">New event</button>
+    }
+  </div>
+  <p class="events__muted events__hint">
+    Published events appear in the Events view of the lift club booking panel, newest first, for
+    everyone, signed in or not. Attendees are names you type here: the page shows their initials,
+    and screen readers read the names.
+  </p>
+
+  @if (notice(); as message) {
+    <p class="alert alert--success" role="status">{{ message }}</p>
+  }
+  @if (actionError(); as message) {
+    <p class="alert alert--error" role="alert">{{ message }}</p>
+  }
+
+  @if (editing()) {
+    <form
+      #eventForm
+      class="event-form"
+      novalidate
+      [attr.aria-labelledby]="'event-form-title'"
+      (submit)="save($event)"
+    >
+      <h3 id="event-form-title">{{ isNew() ? 'New event' : 'Edit event' }}</h3>
+
+      <div class="field">
+        <label for="event-title">Title</label>
+        <input
+          #titleField
+          id="event-title"
+          type="text"
+          autocomplete="off"
+          [attr.maxlength]="limits.title"
+          [value]="title()"
+          [disabled]="saving()"
+          [attr.aria-invalid]="errors().title ? 'true' : null"
+          [attr.aria-describedby]="errors().title ? 'event-title-error' : null"
+          (input)="setText('title', $event)"
+        />
+        @if (errors().title; as error) {
+          <p class="field__error" id="event-title-error">{{ error }}</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="event-description">Description</label>
+        <textarea
+          id="event-description"
+          rows="5"
+          [attr.maxlength]="limits.description"
+          [value]="description()"
+          [disabled]="saving()"
+          [attr.aria-invalid]="errors().description ? 'true' : null"
+          [attr.aria-describedby]="
+            'event-description-hint' + (errors().description ? ' event-description-error' : '')
+          "
+          (input)="setText('description', $event)"
+        ></textarea>
+        <span class="field__hint" id="event-description-hint"
+          >Cards show the first few lines; the search covers all of it.
+          {{ description().length }}/{{ limits.description }}</span
+        >
+        @if (errors().description; as error) {
+          <p class="field__error" id="event-description-error">{{ error }}</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="event-url">Event website or Quicket page</label>
+        <input
+          id="event-url"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          placeholder="https://www.quicket.co.za/events/…"
+          [attr.maxlength]="limits.url"
+          [value]="url()"
+          [disabled]="saving()"
+          [attr.aria-invalid]="errors().url ? 'true' : null"
+          [attr.aria-describedby]="'event-url-hint' + (errors().url ? ' event-url-error' : '')"
+          (input)="setText('url', $event)"
+        />
+        <span class="field__hint" id="event-url-hint"
+          >The event title on the lift club page opens this address in a new tab.</span
+        >
+        @if (errors().url; as error) {
+          <p class="field__error" id="event-url-error">{{ error }}</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="event-image">Thumbnail image</label>
+        <div class="event-form__image">
+          @if (shownImage(); as src) {
+            <img [src]="src" alt="The chosen thumbnail, cropped as on the lift club page" />
+          } @else {
+            <span class="event-form__no-image" aria-hidden="true">No image yet</span>
+          }
+          <div>
+            <input
+              #fileField
+              id="event-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              [disabled]="saving()"
+              [attr.aria-invalid]="errors().image ? 'true' : null"
+              [attr.aria-describedby]="
+                'event-image-hint' + (errors().image ? ' event-image-error' : '')
+              "
+              (change)="chooseImage($event)"
+            />
+            <span class="field__hint" id="event-image-hint"
+              >JPEG, PNG or WebP, under 2 MB. Shown cropped to a 16:10 landscape.{{
+                isNew() ? '' : ' Leave empty to keep the current image.'
+              }}</span
+            >
+            @if (errors().image; as error) {
+              <p class="field__error" id="event-image-error">{{ error }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <fieldset class="field event-form__attendees" [disabled]="saving()">
+        <legend>Attendees <span class="events__muted">(optional, up to four)</span></legend>
+        @for (name of attendees(); track $index; let i = $index) {
+          <div class="event-form__attendee">
+            <span class="event-form__avatar" aria-hidden="true">{{
+              name.trim() ? initials(name) : '?'
+            }}</span>
+            <label class="sr-only" [for]="'event-attendee-' + i">Attendee {{ i + 1 }}</label>
+            <input
+              data-attendee
+              type="text"
+              autocomplete="off"
+              placeholder="Name, e.g. Thandiwe Mokoena"
+              [id]="'event-attendee-' + i"
+              [attr.maxlength]="limits.attendee"
+              [value]="name"
+              [attr.aria-invalid]="errors().attendees ? 'true' : null"
+              (input)="setAttendee(i, $event)"
+            />
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm"
+              [attr.aria-label]="'Remove attendee ' + (i + 1)"
+              (click)="removeAttendee(i)"
+            >
+              Remove
+            </button>
+          </div>
+        }
+        @if (errors().attendees; as error) {
+          <p class="field__error">{{ error }}</p>
+        }
+        <button
+          type="button"
+          class="btn btn--ghost btn--sm event-form__add"
+          [disabled]="!canAddAttendee()"
+          (click)="addAttendee()"
+        >
+          {{ canAddAttendee() ? 'Add attendee' : 'Four attendees is the most' }}
+        </button>
+      </fieldset>
+
+      <label class="event-form__publish">
+        <input
+          type="checkbox"
+          [checked]="published()"
+          [disabled]="saving()"
+          (change)="setPublished($event)"
+        />
+        Show it on the lift club page now
+      </label>
+
+      @if (formError(); as message) {
+        <p class="alert alert--error" role="alert">{{ message }}</p>
+      }
+      <div class="event-form__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : isNew() ? 'Create event' : 'Save changes' }}
+        </button>
+        <button type="button" class="btn btn--ghost" [disabled]="saving()" (click)="cancel()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loadError(); as message) {
+    <p class="alert alert--error" role="alert">
+      {{ message }}
+      <button type="button" class="events__retry" (click)="load()">Try again</button>
+    </p>
+  } @else if (!events()) {
+    <p class="events__muted">Loading…</p>
+  } @else if (!events()!.length) {
+    <p class="events__muted">No events yet. Create one to show it on the lift club page.</p>
+  } @else {
+    <ul class="events__list">
+      @for (event of events(); track event.id) {
+        <li class="events__row">
+          @if (thumbnails()[event.id]; as src) {
+            <img class="events__thumb" [src]="src" alt="" />
+          } @else {
+            <span class="events__thumb" aria-hidden="true"></span>
+          }
+          <div class="events__what">
+            <p class="events__title">
+              {{ event.title }}
+              <span class="events__badge" [class.events__badge--draft]="!event.published">{{
+                event.published ? 'Published' : 'Draft'
+              }}</span>
+            </p>
+            <p class="events__muted events__url">
+              <a [href]="event.url" target="_blank" rel="noopener noreferrer"
+                >{{ event.url }}<span class="sr-only"> (opens in a new tab)</span></a
+              >
+            </p>
+            @if (event.attendees.length) {
+              <ul class="events__people" aria-label="Attending">
+                @for (name of event.attendees; track $index; let i = $index) {
+                  <li [style.--avatar]="colours(event)[i]" [attr.title]="name">
+                    <span aria-hidden="true">{{ initials(name) }}</span
+                    ><span class="sr-only">{{ name }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+          <div class="events__actions">
+            @if (confirming() === event.id) {
+              <span class="events__question">Delete this event?</span>
+              <button
+                type="button"
+                class="btn btn--danger btn--sm"
+                [disabled]="busy()"
+                (click)="remove(event)"
+              >
+                Yes, delete
+              </button>
+              <button
+                type="button"
+                class="btn btn--ghost btn--sm"
+                [disabled]="busy()"
+                (click)="confirming.set(null)"
+              >
+                Keep
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn btn--ghost btn--sm"
+                [disabled]="busy() || saving()"
+                (click)="edit(event)"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                class="btn btn--ghost btn--sm"
+                [disabled]="busy()"
+                (click)="togglePublished(event)"
+              >
+                {{ event.published ? 'Unpublish' : 'Publish' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn--danger btn--sm"
+                [disabled]="busy()"
+                (click)="ask(event.id)"
+              >
+                Delete
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

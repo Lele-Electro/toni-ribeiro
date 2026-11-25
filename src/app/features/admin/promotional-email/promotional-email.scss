@@ -1,0 +1,168 @@
+// Laid out like the admin page's other cards (admin.scss), which this component's styles
+// can't reach.
+:host {
+  display: block;
+}
+
+p {
+  margin: 0;
+}
+
+h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.25rem;
+}
+
+h3 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.05rem;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.promo {
+  padding: var(--space-5);
+
+  .alert {
+    margin: 0 0 var(--space-4);
+  }
+}
+
+.promo__muted {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+p.promo__hint {
+  margin-bottom: var(--space-4);
+}
+
+.promo__warn {
+  color: var(--color-danger);
+  font-weight: 650;
+}
+
+.promo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.promo__confirm {
+  padding: var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: var(--color-accent-soft);
+}
+
+p.promo__question {
+  margin-bottom: var(--space-3);
+  font-weight: 650;
+}
+
+.promo__results {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+
+  ul {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-success-soft);
+    color: var(--color-success);
+    overflow-wrap: anywhere;
+
+    &.is-failed {
+      background: var(--color-danger-soft);
+      color: var(--color-danger);
+    }
+  }
+}
+
+.promo__status {
+  font-weight: 800;
+}
+
+.promo__address {
+  font-weight: 650;
+}
+
+.promo__outcome {
+  font-size: 0.875rem;
+}
+
+.promo__preview {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.promo__preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.promo__widths {
+  display: flex;
+  gap: var(--space-2);
+
+  [aria-pressed='true'] {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+}
+
+p.promo__stale {
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  font-size: 0.875rem;
+}
+
+.promo__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// The email at its real width, with its own grey frame.
+.promo__frame {
+  display: block;
+  width: 100%;
+  max-width: 44rem;
+  height: 70rem;
+  max-height: 80dvh;
+  margin: 0 auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #e8ecf1;
+
+  &--phone {
+    max-width: 390px;
+  }
+}

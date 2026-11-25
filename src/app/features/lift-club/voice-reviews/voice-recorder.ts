@@ -82,7 +82,7 @@ interface Session {
 }
 
 /** Where sign-in returns to: this page with the reviews face showing (see LiftClub). */
-export const REVIEWS_RETURN_URL = '/lift-club?reviews=1';
+export const REVIEWS_RETURN_URL = '/reviews';
 
 /**
  * Records, previews and publishes the member's voice review. Only signed-in members can

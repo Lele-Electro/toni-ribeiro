@@ -120,7 +120,7 @@ describe('VoiceRecorder', () => {
     const link = element.querySelector<HTMLAnchorElement>('a.btn')!;
     expect(link.textContent).toContain('Sign in to record a review');
     expect(decodeURIComponent(link.getAttribute('href')!)).toBe(
-      '/login?returnUrl=/lift-club?reviews=1',
+      '/login?returnUrl=/reviews',
     );
     expect(getUserMedia).not.toHaveBeenCalled();
   });

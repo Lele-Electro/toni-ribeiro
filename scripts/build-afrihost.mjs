@@ -4,16 +4,25 @@
 //   npm run build:afrihost
 //
 // The prerendered pages are served as they are; every other route (password reset, unknown
-// URLs) falls back to the client-rendered shell through .htaccess. The lift club is also
-// rendered in the browser, but gets its own copy of the shell carrying its title,
-// description and share image, because link previews (WhatsApp, Facebook) never run scripts.
+// URLs) falls back to the client-rendered shell through .htaccess. The lift club (and its
+// /events and /reviews views) is also rendered in the browser, but each address gets its own
+// copy of the shell carrying its title, description and share image, because link previews
+// (WhatsApp, Facebook) never run scripts. The home page is switched off: / redirects to the
+// lift club (see app.routes.ts).
 import { execSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // Plain TypeScript data modules, loaded directly (Node strips the types).
 import { SITE_NAME } from '../src/app/core/site.config.ts';
-import { DEFAULT_DESCRIPTION, LIFT_CLUB_PAGE, fullTitle, pageTags } from '../src/app/core/seo/page-tags.ts';
+import {
+  DEFAULT_DESCRIPTION,
+  LIFT_CLUB_EVENTS_PAGE,
+  LIFT_CLUB_PAGE,
+  LIFT_CLUB_REVIEWS_PAGE,
+  fullTitle,
+  pageTags,
+} from '../src/app/core/seo/page-tags.ts';
 import { environment } from '../src/environments/environment.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -57,19 +66,22 @@ writeFileSync(join(out, shell), shellHtml);
 // Without a prerendered home page, the shell is the home page.
 if (!existsSync(join(out, 'index.html'))) cpSync(join(out, shell), join(out, 'index.html'));
 
-// /lift-club -> lift-club/index.html (see the .htaccess rules below).
-const liftClub = join(out, LIFT_CLUB_PAGE.path);
-mkdirSync(liftClub, { recursive: true });
-writeFileSync(
-  join(liftClub, 'index.html'),
-  withHead(shellHtml, {
-    title: fullTitle(SITE_NAME, LIFT_CLUB_PAGE.title),
-    description: LIFT_CLUB_PAGE.description,
-    url: new URL(LIFT_CLUB_PAGE.path, `${environment.siteUrl}/`).href,
-    robots: 'index, follow',
-    image: LIFT_CLUB_PAGE.image,
-  }),
-);
+// /lift-club -> lift-club/index.html, and the same for /events and /reviews (see the
+// .htaccess rules below).
+for (const page of [LIFT_CLUB_PAGE, LIFT_CLUB_EVENTS_PAGE, LIFT_CLUB_REVIEWS_PAGE]) {
+  const folder = join(out, page.path);
+  mkdirSync(folder, { recursive: true });
+  writeFileSync(
+    join(folder, 'index.html'),
+    withHead(shellHtml, {
+      title: fullTitle(SITE_NAME, page.title),
+      description: page.description,
+      url: new URL(page.path, `${environment.siteUrl}/`).href,
+      robots: 'index, follow',
+      image: page.image,
+    }),
+  );
+}
 
 writeFileSync(
   join(out, '.htaccess'),
@@ -88,6 +100,10 @@ DirectorySlash Off
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # The home page is switched off: / opens the lift club. Temporary (302), so that browsers
+  # and search engines don't hold on to it once the home page returns.
+  RewriteRule ^(index\\.html)?$ /${LIFT_CLUB_PAGE.path} [L,R=302]
 
   # Pages with their own HTML: /login -> /login/index.html, /lift-club -> /lift-club/index.html
   RewriteCond %{REQUEST_FILENAME} -d

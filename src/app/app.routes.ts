@@ -2,21 +2,24 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
 import { LIFT_CLUB_PAGE } from './core/seo/page-tags';
 import { SeoRouteData } from './core/seo/seo-title.strategy';
+import { LIFT_CLUB_CHILD_ROUTES } from './features/lift-club/lift-club.routes';
 
 export const routes: Routes = [
   {
+    // The home page (features/landing) is switched off: every visit to / opens the lift club.
+    // To bring it back, replace redirectTo with
+    //   loadComponent: () => import('./features/landing/landing').then((m) => m.Landing),
+    // and remove the matching redirect in scripts/build-afrihost.mjs.
     path: '',
     pathMatch: 'full',
-    loadComponent: () => import('./features/landing/landing').then((m) => m.Landing),
+    redirectTo: LIFT_CLUB_PAGE.path,
   },
   {
-    path: LIFT_CLUB_PAGE.path,
-    title: LIFT_CLUB_PAGE.title,
-    data: {
-      description: LIFT_CLUB_PAGE.description,
-      image: LIFT_CLUB_PAGE.image,
-    } satisfies SeoRouteData,
+    // /lift-club, /events and /reviews: one page, which stays on screen as the address
+    // moves between its views (see lift-club.routes.ts).
+    path: '',
     loadComponent: () => import('./features/lift-club/lift-club').then((m) => m.LiftClub),
+    children: LIFT_CLUB_CHILD_ROUTES,
   },
   {
     path: 'referral-business',

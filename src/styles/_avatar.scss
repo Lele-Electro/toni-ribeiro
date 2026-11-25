@@ -1,0 +1,16 @@
+// The initials circle of the lift club's voice reviews, shared with the event attendees.
+// Its colour comes from --avatar, which avatarColours() picks per name
+// (features/lift-club/voice-reviews/avatar-colours.ts); white initials read on every one.
+@mixin initials-avatar($size: 3.25rem, $font-size: 0.95rem) {
+  display: grid;
+  place-items: center;
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  background: var(--avatar, #1b4f43);
+  color: #fff;
+  font-size: $font-size;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}

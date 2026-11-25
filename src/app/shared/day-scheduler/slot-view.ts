@@ -13,3 +13,6 @@ export interface SlotView {
   /** The signed-in member's own reservation for this hour. */
   booking?: LiftBooking;
 }
+
+/** What the booking table shows: its hours, or the lift club's events in their place. */
+export type SchedulerView = 'times' | 'events';

@@ -10,7 +10,7 @@
           class="day"
           [class.selected]="selectedDate() === day.key"
           [attr.aria-pressed]="selectedDate() === day.key"
-          (click)="selectedDate.set(day.key)"
+          (click)="selectDay(day.key)"
         >
           <span>{{ day.label }}</span
           ><span class="day-date">{{ day.short }}</span>
@@ -18,84 +18,116 @@
       }
     </div>
     <p class="day-hint">One hour. Up to 3 travellers.<br />Choose a time that suits you.</p>
-    <button type="button" class="see-reviews" data-see-reviews (click)="seeReviews.emit()">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6.5v3M5 4v8M8 2v12M11 4.5v7M14 6.5v3" /></svg>
-      See reviews
-    </button>
+    <hr class="day-divider" />
+    <div class="pane-actions">
+      <button
+        type="button"
+        class="events-toggle"
+        data-events-toggle
+        [attr.aria-pressed]="view() === 'events'"
+        (click)="toggleEvents()"
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <rect x="2.5" y="3.5" width="11" height="10" rx="1.5" />
+          <path d="M2.5 7h11M5.5 2v3M10.5 2v3" />
+        </svg>
+        Events
+      </button>
+      <button type="button" class="see-reviews" data-see-reviews (click)="seeReviews.emit()">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M2 6.5v3M5 4v8M8 2v12M11 4.5v7M14 6.5v3" />
+        </svg>
+        See reviews
+      </button>
+    </div>
   </aside>
 
-  <div class="slot-pane">
-    <header class="slot-header">
-      <div>
-        <p class="eyebrow">Available departures</p>
-        <h3>Choose your timeslot</h3>
-      </div>
-      <p class="slot-help">
-        05:00 – 02:00 the following morning. Each booking reserves the whole slot.
-      </p>
-    </header>
-    @if (loadError()) {
-      <div class="load-error" role="alert">
-        {{ loadError() }} <button type="button" (click)="refresh()">Retry</button>
-      </div>
-    }
-    <p class="booking-message" role="status">
-      {{ loading() ? 'Loading available times…' : message() }}
-    </p>
+  <!-- The booking times and the events share this pane; the hidden one is inert. -->
+  <div class="views">
     <div
-      class="slot-scroll"
-      tabindex="0"
-      aria-label="Hourly timeslots; scroll for later departures"
+      class="slot-pane view"
+      [class.view--hidden]="view() === 'events'"
+      [attr.inert]="view() === 'events' ? '' : null"
     >
-      @for (hour of hours; track hour) {
-        @if (hour === 24) {
-          <p class="next-day">After midnight · {{ nextDate() }}</p>
-        }
-        <div
-          class="slot-row"
-          [class.slot-row--taken]="isTaken(hour)"
-          [class.slot-row--past]="isPast(hour)"
-          [class.slot-row--mine]="!!ownBooking(hour)"
-        >
-          <span class="hour-label">{{ hourLabel(hour) }}</span>
-          @if (ownBooking(hour); as booking) {
-            <button
-              type="button"
-              class="slot slot--mine"
-              [disabled]="isPast(hour) || !!loadError()"
-              (click)="openSlot(hour, booking)"
-            >
-              <span class="slot__time">{{ slotLabel(hour) }}</span>
-              <app-booked-marker class="slot__marker" />
-              <span class="slot__meta"
-                >Your booking · {{ booking.passengers }}
-                {{ booking.passengers === 1 ? 'traveller' : 'travellers' }}
-                <small>Edit</small></span
-              >
-            </button>
-          } @else {
-            <button
-              type="button"
-              class="slot"
-              [disabled]="unavailable(hour)"
-              (click)="openSlot(hour)"
-              [attr.aria-label]="
-                slotLabel(hour) +
-                (isPast(hour) ? ', elapsed' : isTaken(hour) ? ', slot taken' : ', available')
-              "
-            >
-              <span>{{ slotLabel(hour) }}</span>
-              <span
-                >{{ isPast(hour) ? 'Elapsed' : isTaken(hour) ? 'Slot taken' : 'Select slot'
-                }}<span aria-hidden="true">
-                  {{ isTaken(hour) || isPast(hour) ? '—' : '+' }}</span
-                ></span
-              >
-            </button>
-          }
+      <header class="slot-header">
+        <div>
+          <p class="eyebrow">Available departures</p>
+          <h3>Choose your timeslot</h3>
+        </div>
+        <p class="slot-help">
+          05:00 – 02:00 the following morning. Each booking reserves the whole slot.
+        </p>
+      </header>
+      @if (loadError()) {
+        <div class="load-error" role="alert">
+          {{ loadError() }} <button type="button" (click)="refresh()">Retry</button>
         </div>
       }
+      <p class="booking-message" role="status">
+        {{ loading() ? 'Loading available times…' : message() }}
+      </p>
+      <div
+        class="slot-scroll"
+        tabindex="0"
+        aria-label="Hourly timeslots; scroll for later departures"
+      >
+        @for (hour of hours; track hour) {
+          @if (hour === 24) {
+            <p class="next-day">After midnight · {{ nextDate() }}</p>
+          }
+          <div
+            class="slot-row"
+            [class.slot-row--taken]="isTaken(hour)"
+            [class.slot-row--past]="isPast(hour)"
+            [class.slot-row--mine]="!!ownBooking(hour)"
+          >
+            <span class="hour-label">{{ hourLabel(hour) }}</span>
+            @if (ownBooking(hour); as booking) {
+              <button
+                type="button"
+                class="slot slot--mine"
+                [disabled]="isPast(hour) || !!loadError()"
+                (click)="openSlot(hour, booking)"
+              >
+                <span class="slot__time">{{ slotLabel(hour) }}</span>
+                <app-booked-marker class="slot__marker" />
+                <span class="slot__meta"
+                  >Your booking · {{ booking.passengers }}
+                  {{ booking.passengers === 1 ? 'traveller' : 'travellers' }}
+                  <small>Edit</small></span
+                >
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="slot"
+                [disabled]="unavailable(hour)"
+                (click)="openSlot(hour)"
+                [attr.aria-label]="
+                  slotLabel(hour) +
+                  (isPast(hour) ? ', elapsed' : isTaken(hour) ? ', slot taken' : ', available')
+                "
+              >
+                <span>{{ slotLabel(hour) }}</span>
+                <span
+                  >{{ isPast(hour) ? 'Elapsed' : isTaken(hour) ? 'Slot taken' : 'Select slot'
+                  }}<span aria-hidden="true">
+                    {{ isTaken(hour) || isPast(hour) ? '—' : '+' }}</span
+                  ></span
+                >
+              </button>
+            }
+          </div>
+        }
+      </div>
     </div>
+    <app-event-browser
+      class="events-pane view"
+      [class.view--hidden]="view() !== 'events'"
+      [attr.inert]="view() !== 'events' ? '' : null"
+      [active]="view() === 'events'"
+      (back)="showTimes()"
+    />
   </div>
 </section>
 
@@ -109,10 +141,13 @@
     [loading]="loading()"
     [loadError]="loadError()"
     [message]="message()"
-    (dateChange)="selectedDate.set($event)"
+    [view]="view()"
+    (dateChange)="selectDay($event)"
     (book)="openSlot($event.hour, $event.booking)"
     (retry)="refresh()"
     (seeReviews)="seeReviews.emit()"
+    (toggleEvents)="toggleEvents()"
+    (backToTimes)="showTimes()"
   />
 }
 

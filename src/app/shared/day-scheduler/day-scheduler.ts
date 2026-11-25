@@ -1,12 +1,18 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   Component,
   DestroyRef,
   ElementRef,
+  Injector,
+  PLATFORM_ID,
   afterNextRender,
   computed,
+  effect,
   inject,
+  input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -20,8 +26,10 @@ import {
 import { httpErrorMessage } from '../../core/http-error-message';
 import { PlaceAutocomplete } from '../place-autocomplete/place-autocomplete';
 import { BookedMarker } from '../booked-marker/booked-marker';
+import { EventBrowser } from '../../features/lift-club/events/event-browser';
+import { EventStore } from '../../features/lift-club/events/event-store';
 import { MobileBookingWidget } from './mobile-booking-widget';
-import { SlotView } from './slot-view';
+import { SchedulerView, SlotView } from './slot-view';
 import {
   SLOT_HOURS,
   dateAfter,
@@ -40,9 +48,11 @@ const normaliseWhatsapp = (value: string) => value.trim().replace(/[\s().-]/g, '
 
 @Component({
   selector: 'app-day-scheduler',
-  imports: [RouterLink, PlaceAutocomplete, MobileBookingWidget, BookedMarker],
+  imports: [RouterLink, PlaceAutocomplete, MobileBookingWidget, BookedMarker, EventBrowser],
   templateUrl: './day-scheduler.html',
   styleUrl: './day-scheduler.scss',
+  // One list of events and one search, shared by the desktop table and the phone widget.
+  providers: [EventStore],
 })
 export class DayScheduler {
   protected readonly auth = inject(AuthService);
@@ -50,8 +60,21 @@ export class DayScheduler {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly events = inject(EventStore);
   /** "See reviews" was pressed, on the desktop table or the mobile widget. */
   readonly seeReviews = output<void>();
+  /**
+   * What the table shows: the booking times, or the events in their place. The page decides
+   * (from its address: /lift-club or /events); the table asks for a change through
+   * viewChange. Both views stay mounted, so the day, the hour chosen on the phone and any
+   * message survive a visit to the events.
+   */
+  readonly view = input<SchedulerView>('times');
+  readonly viewChange = output<SchedulerView>();
+  /** Where focus goes once a view this table asked for shows; null to leave it. */
+  private pendingFocus: string | null = null;
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('bookingDialog');
   private readonly whatsappField = viewChild<ElementRef<HTMLInputElement>>('whatsappField');
   private readonly pickupField = viewChild<PlaceAutocomplete>('pickupField');
@@ -114,6 +137,21 @@ export class DayScheduler {
       this.destroyed = true;
       this.requestVersion++;
     });
+    // The events load when they first show, including at /events, but never on the server.
+    // A switch this table asked for moves focus to its view once that has rendered.
+    const browser = isPlatformBrowser(inject(PLATFORM_ID));
+    let shown: SchedulerView | undefined;
+    effect(() => {
+      const view = this.view();
+      untracked(() => {
+        if (view === 'events' && browser) void this.events.load();
+        const focus = shown !== undefined && shown !== view ? this.pendingFocus : null;
+        this.pendingFocus = null;
+        shown = view;
+        if (focus)
+          afterNextRender(() => void this.focusVisible(focus), { injector: this.injector });
+      });
+    });
     afterNextRender(() => {
       const phone = globalThis.matchMedia?.('(max-width: 40rem)');
       if (phone) {
@@ -156,6 +194,49 @@ export class DayScheduler {
       this.openSlot(hour);
       void this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
     }
+  }
+
+  protected showEvents(): void {
+    this.request('events', '[data-events-heading]');
+  }
+
+  /** Back to the booking times; focus returns to the Events control that opened the events. */
+  protected showTimes(): void {
+    this.request('times', '[data-events-toggle]');
+  }
+
+  protected toggleEvents(): void {
+    if (this.view() === 'events') this.showTimes();
+    else this.showEvents();
+  }
+
+  /** Picking a day is picking a departure, so the booking times come back. Focus stays put. */
+  protected selectDay(key: string): void {
+    this.selectedDate.set(key);
+    this.request('times', null);
+  }
+
+  /** Asks the page for another view; focus moves once it shows (see the constructor). */
+  private request(view: SchedulerView, focus: string | null): void {
+    if (this.view() === view) return;
+    this.pendingFocus = focus;
+    this.viewChange.emit(view);
+  }
+
+  /** The events' heading, where it is on screen. False until it can take focus. */
+  focusEventsHeading(): boolean {
+    return this.focusVisible('[data-events-heading]');
+  }
+
+  /**
+   * Focuses the copy on screen: the desktop table and the phone widget each have one, and
+   * only one of them is displayed. False if it couldn't take focus (yet).
+   */
+  private focusVisible(selector: string): boolean {
+    const targets = [...this.host.nativeElement.querySelectorAll<HTMLElement>(selector)];
+    const target = targets.find((item) => item.getClientRects().length > 0) ?? targets[0];
+    target?.focus({ preventScroll: true });
+    return !!target && target.ownerDocument.activeElement === target;
   }
 
   protected async refresh(): Promise<void> {
