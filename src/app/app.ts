@@ -3,7 +3,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, PRIMARY_OUTLET, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { EntryContext } from './core/entry-context';
-import { LIFT_CLUB_SEGMENTS } from './core/navigation';
 import { Navbar } from './layout/navbar/navbar';
 
 @Component({
@@ -22,7 +21,7 @@ export class App {
   });
   protected readonly showNavbar = computed(() => this.route().length > 0);
   /** The lift club page keeps its whole schedule in view, so its header sits higher. */
-  protected readonly compactHeader = computed(() => LIFT_CLUB_SEGMENTS.includes(this.route()[0]));
+  protected readonly compactHeader = computed(() => this.route()[0] === 'lift-club');
 
   constructor() {
     // Created here, before the first navigation finishes, so it sees where the visit began.

@@ -48,19 +48,19 @@ export const LIFT_CLUB_PAGE = {
 } as const;
 
 /**
- * The lift club's events and voice reviews: the same page at their own addresses, which open
- * it on that view. Static copies of the shell carry these tags too (build-afrihost.mjs).
+ * The lift club's events and voice reviews: the same page at its own sub-paths, which open it
+ * on that view. Static copies of the shell carry these tags too (build-afrihost.mjs).
  */
 export const LIFT_CLUB_EVENTS_PAGE = {
-  path: 'events',
-  title: 'Lift Club Events',
+  path: 'lift-club/events',
+  title: 'Transport for Events',
   description:
     'Events around Johannesburg, and a private lift there and home again with Toni Ribeiro’s lift club.',
   image: LIFT_CLUB_PAGE.image,
 } as const;
 
 export const LIFT_CLUB_REVIEWS_PAGE = {
-  path: 'reviews',
+  path: 'lift-club/reviews',
   title: 'Lift Club Voice Reviews',
   description:
     'Hear riders describe travelling with Toni Ribeiro’s private lift club in Johannesburg, in their own voices.',

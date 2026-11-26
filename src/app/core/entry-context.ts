@@ -2,12 +2,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { LIFT_CLUB_SEGMENTS } from './navigation';
 
 const STORAGE_KEY = 'ribeiro.entry';
 const LIFT_CLUB = 'lift-club';
-/** /lift-club, /events and /reviews are all the lift club page. */
-const onLiftClub = (page: string | null) => page !== null && LIFT_CLUB_SEGMENTS.includes(page);
+/** The lift club page and its views (/lift-club/events, /lift-club/reviews) start with 'lift-club'. */
+const onLiftClub = (page: string | null) => page === LIFT_CLUB;
 /** Signing in from the lift club and coming back is part of the same visit. */
 const SIGN_IN_PAGES = ['login', 'forgot-password', 'reset-password'];
 

@@ -25,6 +25,11 @@ export interface EventFormValue {
   image: File | null;
   /** An event that already has a thumbnail may keep it. */
   hasImage: boolean;
+  /**
+   * How many names may be typed: four, less any members who added themselves. Defaults to
+   * four.
+   */
+  places?: number;
 }
 
 /** An absolute http(s) address on a public host, such as a Quicket page. */
@@ -81,7 +86,12 @@ export function validateEvent(value: EventFormValue): EventErrors {
     errors.image = 'Choose a thumbnail image.';
   }
   const names = attendeeNames(value.attendees);
-  if (names.length > EVENT_LIMITS.attendees) errors.attendees = 'Add at most four attendees.';
+  const places = value.places ?? EVENT_LIMITS.attendees;
+  if (names.length > places)
+    errors.attendees =
+      places === EVENT_LIMITS.attendees
+        ? 'Add at most four attendees.'
+        : `Members have added themselves, so add at most ${places} ${places === 1 ? 'name' : 'names'}.`;
   else if (names.some((name) => name.length > EVENT_LIMITS.attendee))
     errors.attendees = `Keep each attendee’s name to ${EVENT_LIMITS.attendee} characters.`;
   return errors;

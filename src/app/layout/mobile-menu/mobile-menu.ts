@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, PRIMARY_OUTLET, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
-import { LIFT_CLUB_SEGMENTS, isUnavailable } from '../../core/navigation';
+import { isLiftClubPath, isUnavailable } from '../../core/navigation';
 
 interface MenuItem {
   key: string;
@@ -93,7 +93,7 @@ export class MobileMenu {
     if (route === 'schedule')
       return url.queryParams['service'] === 'general' ? 'contact' : 'schedule';
     if (['login', 'forgot-password', 'reset-password'].includes(route)) return 'account';
-    if (LIFT_CLUB_SEGMENTS.includes(route)) return 'lift-club';
+    if (isLiftClubPath(route)) return 'lift-club';
     return route;
   });
 

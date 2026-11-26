@@ -113,8 +113,8 @@ describe('MobileMenu', () => {
     expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe(
       'Private Lift Club',
     );
-    // /events and /reviews are the lift club page too.
-    for (const url of ['/events', '/reviews']) {
+    // /lift-club/events and /lift-club/reviews are the lift club page too.
+    for (const url of ['/lift-club/events', '/lift-club/reviews']) {
       await router.navigateByUrl(url);
       await settle();
       expect(dialog().querySelector('[aria-current="page"]')!.textContent!.trim()).toBe(

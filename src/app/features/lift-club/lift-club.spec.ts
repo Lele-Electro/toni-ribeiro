@@ -31,9 +31,9 @@ const eventsApi = {
   useValue: { list: eventsList, imageUrl: () => '' },
 };
 
-/** /lift-club, /events and /reviews, as app.routes.ts has them. */
+/** /lift-club, /lift-club/events and /lift-club/reviews, as app.routes.ts has them. */
 const liftClubRoutes: Routes = [
-  { path: '', component: LiftClub, children: LIFT_CLUB_CHILD_ROUTES },
+  { path: 'lift-club', component: LiftClub, children: LIFT_CLUB_CHILD_ROUTES },
 ];
 
 describe('LiftClub', () => {
@@ -125,11 +125,11 @@ describe('LiftClub', () => {
       ).toContain('See reviews');
     });
 
-    it('moves to /events and back, keeping the chosen day', async () => {
+    it('moves to /lift-club/events and back, keeping the chosen day', async () => {
       await click('.day:nth-child(3)');
       const day = selectedDay();
       await click('.day-pane [data-events-toggle]');
-      expect(router.url).toBe('/events');
+      expect(router.url).toBe('/lift-club/events');
       expect(times().hasAttribute('inert')).toBe(true);
       expect(events().hasAttribute('inert')).toBe(false);
       expect(document.activeElement!.hasAttribute('data-events-heading')).toBe(true);
@@ -141,11 +141,11 @@ describe('LiftClub', () => {
       expect(selectedDay()).toBe(day);
     });
 
-    it('turns to /reviews and back, keeping the chosen day and moving focus', async () => {
+    it('turns to /lift-club/reviews and back, keeping the chosen day and moving focus', async () => {
       await click('.day:nth-child(4)');
       const day = selectedDay();
       await click('.day-pane .see-reviews');
-      expect(router.url).toBe('/reviews');
+      expect(router.url).toBe('/lift-club/reviews');
       expect(card().classList.contains('is-flipped')).toBe(true);
       expect(card().classList.contains('has-turned')).toBe(true);
       expect(front().hasAttribute('inert')).toBe(true);
@@ -163,19 +163,19 @@ describe('LiftClub', () => {
     it('returns from the reviews to the events if that is where the visitor was', async () => {
       await click('.day-pane [data-events-toggle]');
       await click('.day-pane .see-reviews');
-      expect(router.url).toBe('/reviews');
+      expect(router.url).toBe('/lift-club/reviews');
       await click('.reviews__back');
-      expect(router.url).toBe('/events');
+      expect(router.url).toBe('/lift-club/events');
       expect(card().classList.contains('is-flipped')).toBe(false);
       expect(events().hasAttribute('inert')).toBe(false);
     });
 
     it('follows the address when it changes, as Back and Forward do', async () => {
       const page = element;
-      await router.navigateByUrl('/reviews');
+      await router.navigateByUrl('/lift-club/reviews');
       await settle();
       expect(card().classList.contains('is-flipped')).toBe(true);
-      await router.navigateByUrl('/events');
+      await router.navigateByUrl('/lift-club/events');
       await settle();
       expect(card().classList.contains('is-flipped')).toBe(false);
       expect(events().hasAttribute('inert')).toBe(false);
@@ -194,10 +194,10 @@ describe('LiftClub', () => {
       expect(card().classList.contains('is-flipped')).toBe(false);
     });
 
-    it('asks signed-out visitors to sign in before recording, returning to /reviews', () => {
+    it('asks signed-out visitors to sign in before recording, returning to /lift-club/reviews', () => {
       const link = back().querySelector<HTMLAnchorElement>('app-voice-recorder a')!;
       expect(link.textContent).toContain('Sign in to record a review');
-      expect(link.getAttribute('href')).toBe('/login?returnUrl=%2Freviews');
+      expect(link.getAttribute('href')).toBe('/login?returnUrl=%2Flift-club%2Freviews');
       expect(back().querySelector('button.btn--record')).toBeNull();
     });
 
@@ -233,9 +233,9 @@ describe('LiftClub', () => {
   });
 
   describe('opened by a link', () => {
-    it('to /events shows the events at once, focused, without the phone intro', async () => {
-      await open('/events');
-      expect(router.url).toBe('/events');
+    it('to /lift-club/events shows the events at once, focused, without the phone intro', async () => {
+      await open('/lift-club/events');
+      expect(router.url).toBe('/lift-club/events');
       expect(times().hasAttribute('inert')).toBe(true);
       expect(events().hasAttribute('inert')).toBe(false);
       expect(eventsList).toHaveBeenCalledOnce();
@@ -246,9 +246,9 @@ describe('LiftClub', () => {
       );
     });
 
-    it('to /reviews shows the reviews without a turn, focused, without the phone intro', async () => {
+    it('to /lift-club/reviews shows the reviews without a turn, focused, without the phone intro', async () => {
       signedIn.set(true);
-      await open('/reviews');
+      await open('/lift-club/reviews');
       expect(card().classList.contains('is-flipped')).toBe(true);
       expect(card().classList.contains('has-turned')).toBe(false);
       expect(back().hasAttribute('inert')).toBe(false);
@@ -260,9 +260,9 @@ describe('LiftClub', () => {
       expect(router.url).toBe('/lift-club');
     });
 
-    it('written before /reviews existed (/lift-club?reviews=1) lands on /reviews', async () => {
+    it('written before /reviews existed (/lift-club?reviews=1) lands on /lift-club/reviews', async () => {
       await open('/lift-club?reviews=1');
-      expect(router.url).toBe('/reviews');
+      expect(router.url).toBe('/lift-club/reviews');
       expect(card().classList.contains('is-flipped')).toBe(true);
       expect(card().classList.contains('has-turned')).toBe(false);
     });
@@ -276,12 +276,20 @@ describe('LiftClub', () => {
       expect(times().hasAttribute('inert')).toBe(false);
     });
 
-    it('serves /events and /reviews from the same page', async () => {
-      await open('/events', appRoutes);
+    it('serves /lift-club/events and /lift-club/reviews from the same page', async () => {
+      await open('/lift-club/events', appRoutes);
       expect(events().hasAttribute('inert')).toBe(false);
-      await router.navigateByUrl('/reviews?campaign=email');
+      await router.navigateByUrl('/lift-club/reviews?campaign=email');
       await settle();
       expect(card().classList.contains('is-flipped')).toBe(true);
+    });
+
+    it('sends the earlier /events and /reviews addresses to their new home', async () => {
+      await open('/events', appRoutes);
+      expect(router.url).toBe('/lift-club/events');
+      await router.navigateByUrl('/reviews');
+      await settle();
+      expect(router.url).toBe('/lift-club/reviews');
     });
   });
 });

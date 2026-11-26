@@ -50,7 +50,19 @@ export interface AdminOverview {
 }
 
 /** A lift club event as the owner manages it, drafts included. */
+/** A member who added themselves to an event ("Add me" on the lift club page). */
+export interface EventMember {
+  userId: string;
+  /** As shown publicly, e.g. "Naledi M.". */
+  name: string;
+  /** Null only if the account no longer exists. */
+  email: string | null;
+}
+
 export interface AdminEvent extends LiftEvent {
+  /** Only the names typed on this page; the members who added themselves are in `members`. */
+  attendees: string[];
+  members: EventMember[];
   /** Shown on the lift club page only when true. */
   published: boolean;
   createdAt: string;
@@ -127,6 +139,11 @@ export class AdminService {
 
   async deleteEvent(id: string): Promise<void> {
     await firstValueFrom(this.http.delete(`${this.url}/events/${id}`));
+  }
+
+  /** Takes a member who added themselves off an event. */
+  async removeEventMember(eventId: string, userId: string): Promise<void> {
+    await firstValueFrom(this.http.delete(`${this.url}/events/${eventId}/members/${userId}`));
   }
 
   /**

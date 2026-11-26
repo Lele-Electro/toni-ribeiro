@@ -5,7 +5,7 @@
 //
 // The prerendered pages are served as they are; every other route (password reset, unknown
 // URLs) falls back to the client-rendered shell through .htaccess. The lift club (and its
-// /events and /reviews views) is also rendered in the browser, but each address gets its own
+// /lift-club/events and /lift-club/reviews views) is also rendered in the browser, but each address gets its own
 // copy of the shell carrying its title, description and share image, because link previews
 // (WhatsApp, Facebook) never run scripts. The home page is switched off: / redirects to the
 // lift club (see app.routes.ts).
@@ -104,6 +104,9 @@ DirectorySlash Off
   # The home page is switched off: / opens the lift club. Temporary (302), so that browsers
   # and search engines don't hold on to it once the home page returns.
   RewriteRule ^(index\\.html)?$ /${LIFT_CLUB_PAGE.path} [L,R=302]
+
+  # The events and reviews views' first addresses, now under /lift-club.
+  RewriteRule ^(events|reviews)/?$ /${LIFT_CLUB_PAGE.path}/$1 [L,R=301]
 
   # Pages with their own HTML: /login -> /login/index.html, /lift-club -> /lift-club/index.html
   RewriteCond %{REQUEST_FILENAME} -d

@@ -9,7 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { AdminEvent, AdminService } from '../../../core/admin/admin.service';
+import { AdminEvent, AdminService, EventMember } from '../../../core/admin/admin.service';
 import { httpErrorMessage } from '../../../core/http-error-message';
 import { avatarColours } from '../../lift-club/voice-reviews/avatar-colours';
 import { initialsOf } from '../../lift-club/events/initials';
@@ -76,9 +76,13 @@ export class AdminEvents {
       (editing && editing !== 'new' ? (this.thumbnails()[editing.id] ?? null) : null)
     );
   });
-  protected readonly canAddAttendee = computed(
-    () => this.attendees().length < EVENT_LIMITS.attendees,
-  );
+  /** Names that may be typed: four, less the members who added themselves. */
+  protected readonly places = computed(() => {
+    const editing = this.editing();
+    const members = editing && editing !== 'new' ? editing.members.length : 0;
+    return Math.max(0, EVENT_LIMITS.attendees - members);
+  });
+  protected readonly canAddAttendee = computed(() => this.attendees().length < this.places());
 
   constructor() {
     // The session lives in the browser, so there is nothing to load on the server.
@@ -120,8 +124,13 @@ export class AdminEvents {
     return initialsOf(name);
   }
 
+  /** Everyone on the event, as the lift club page lists them: typed names, then members. */
+  protected people(event: AdminEvent): string[] {
+    return [...event.attendees, ...event.members.map((member) => member.name)];
+  }
+
   protected colours(event: AdminEvent): string[] {
-    return avatarColours(event.attendees);
+    return avatarColours(this.people(event));
   }
 
   protected startNew(): void {
@@ -222,6 +231,7 @@ export class AdminEvents {
       attendees: this.attendees(),
       image: this.image(),
       hasImage: editing !== 'new',
+      places: this.places(),
     };
     const errors = validateEvent(value);
     this.errors.set(errors);
@@ -277,6 +287,14 @@ export class AdminEvents {
 
   protected remove(event: AdminEvent): Promise<void> {
     return this.run(() => this.admin.deleteEvent(event.id), `Deleted “${event.title}”.`);
+  }
+
+  /** Takes someone who added themselves off the event. */
+  protected removeMember(event: AdminEvent, member: EventMember): Promise<void> {
+    return this.run(
+      () => this.admin.removeEventMember(event.id, member.userId),
+      `Removed ${member.name} from “${event.title}”.`,
+    );
   }
 
   private async run(action: () => Promise<unknown>, done: string): Promise<void> {

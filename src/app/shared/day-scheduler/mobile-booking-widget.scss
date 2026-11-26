@@ -377,13 +377,13 @@ svg path {
   text-align: center;
 }
 
-// Below a divider, as on the desktop table: Events and See reviews, showing with either
-// view. Smaller than the Reserve button (3.5rem, full width) but still 44px targets. Look
-// and pulse: .events-toggle and .see-reviews in styles/_components.scss.
+// Below a divider, as on the desktop table: Events and See reviews as equal halves of one
+// row, showing with either view. Lower than the Reserve button (3.5rem) but still 44px
+// targets. Look: .events-toggle and .see-reviews in styles/_components.scss.
 .widget__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.6rem;
   padding-top: 0.85rem;
   border-top: 1px solid rgb(67 94 79 / 15%);
@@ -391,12 +391,21 @@ svg path {
 
 .widget__action {
   min-height: 2.75rem;
-  padding: 0 1.25rem;
+  padding: 0 0.75rem;
   font-size: 0.875rem;
 
   svg path,
   svg rect {
     stroke-width: 2;
+  }
+}
+
+// The narrowest phones (320px): tighter labels, so the pair still shares one row.
+@container (max-width: 17rem) {
+  .widget__action {
+    gap: 0.3rem;
+    padding-inline: 0.5rem;
+    font-size: 0.8125rem;
   }
 }
 

@@ -57,8 +57,8 @@ describe('Navbar', () => {
 
   it.each([
     ['/lift-club', 'Private Lift Club'],
-    ['/events', 'Private Lift Club'],
-    ['/reviews?campaign=email', 'Private Lift Club'],
+    ['/lift-club/events', 'Private Lift Club'],
+    ['/lift-club/reviews?campaign=email', 'Private Lift Club'],
     ['/referral-business', 'Other'],
     ['/login?returnUrl=%2Fschedule', 'Log in'],
     ['/forgot-password', 'Log in'],

@@ -48,16 +48,17 @@ const view = (
 });
 
 /**
- * /lift-club, /events and /reviews. They are children of the one route that shows LiftClub
- * (see app.routes.ts), so moving between them keeps the page, and the booking table's day,
- * hour and form, on screen; LiftClub reads `liftClubView` to show the right view.
+ * /lift-club, /lift-club/events and /lift-club/reviews: children of the /lift-club route that
+ * shows LiftClub (see app.routes.ts), so moving between them keeps the page, and the booking
+ * table's day, hour and form, on screen; LiftClub reads `liftClubView` to show the right view.
  */
 export const LIFT_CLUB_CHILD_ROUTES: Routes = [
   {
-    path: LIFT_CLUB_PAGE.path,
+    path: '',
+    pathMatch: 'full',
     canActivate: [reviewsQueryRedirect],
     ...view(LIFT_CLUB_PAGE, 'times'),
   },
-  { path: LIFT_CLUB_EVENTS_PAGE.path, ...view(LIFT_CLUB_EVENTS_PAGE, 'events') },
-  { path: LIFT_CLUB_REVIEWS_PAGE.path, ...view(LIFT_CLUB_REVIEWS_PAGE, 'reviews') },
+  { path: 'events', ...view(LIFT_CLUB_EVENTS_PAGE, 'events') },
+  { path: 'reviews', ...view(LIFT_CLUB_REVIEWS_PAGE, 'reviews') },
 ];

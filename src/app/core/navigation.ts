@@ -10,10 +10,11 @@ export const UNAVAILABLE_PATHS: readonly string[] = [
 ];
 
 /**
- * The lift club page's addresses: its booking times, its events and its voice reviews
- * (features/lift-club/lift-club.routes.ts). Navigation treats them as one page.
+ * The lift club page: /lift-club, or one of its views (/lift-club/events,
+ * /lift-club/reviews). `path` has no leading slash, query or fragment.
  */
-export const LIFT_CLUB_SEGMENTS: readonly string[] = ['lift-club', 'events', 'reviews'];
+export const isLiftClubPath = (path: string): boolean =>
+  path === 'lift-club' || path.startsWith('lift-club/');
 
 /** Where members arrive after logging in: the lift club booking table. */
 export const AFTER_LOGIN_URL = '/lift-club';

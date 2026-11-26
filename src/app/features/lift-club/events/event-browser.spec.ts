@@ -1,4 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { EventsService, LiftEvent } from '../../../core/events/events.service';
 import { EventBrowser } from './event-browser';
 import { EventStore } from './event-store';
@@ -10,8 +14,12 @@ describe('EventBrowser', () => {
   let store: EventStore;
   const api = {
     list: vi.fn(),
+    joined: vi.fn(),
+    attend: vi.fn(),
+    leave: vi.fn(),
     imageUrl: (event: LiftEvent) => `/events/${event.id}/image?v=${event.imageRevision}`,
   };
+  const user = signal<{ userId: string } | null>(null);
   const event = (
     id: string,
     title: string,
@@ -47,11 +55,20 @@ describe('EventBrowser', () => {
   };
   const state = () => element.querySelector('.events__state')?.textContent?.trim();
 
-  async function create(list: () => Promise<LiftEvent[]>) {
+  async function create(list: () => Promise<LiftEvent[]>, signedIn = false) {
     api.list.mockReset().mockImplementation(list);
+    api.joined.mockReset().mockResolvedValue([]);
+    api.attend.mockReset();
+    api.leave.mockReset();
+    user.set(signedIn ? { userId: 'rider-1' } : null);
     TestBed.configureTestingModule({
       imports: [EventBrowser],
-      providers: [EventStore, { provide: EventsService, useValue: api }],
+      providers: [
+        provideRouter([]),
+        EventStore,
+        { provide: EventsService, useValue: api },
+        { provide: AuthService, useValue: { user, isAuthenticated: () => user() !== null } },
+      ],
     });
     fixture = TestBed.createComponent(EventBrowser);
     element = fixture.nativeElement;
@@ -76,15 +93,19 @@ describe('EventBrowser', () => {
     const first = cards()[0];
     const order = [
       ...first.querySelectorAll(
-        '.event__image, .event__title, .event__description, .event__attendees',
+        '.event__image, .event__title, .event__add, .event__description, .event__attendees',
       ),
-    ].map((node) => node.className);
+    ].map((node) => node.className.split(' ')[0]);
     expect(order).toEqual([
       'event__image',
       'event__title',
+      'event__add',
       'event__description',
       'event__attendees',
     ]);
+    expect(element.querySelector('[data-events-heading]')!.textContent!.trim()).toBe(
+      'Transport for Events',
+    );
     expect(first.querySelector('img')!.getAttribute('src')).toBe('/events/jazz/image?v=2');
     expect(first.querySelector('img')!.getAttribute('alt')).toBe('');
     const link = first.querySelector<HTMLAnchorElement>('.event__title a')!;
@@ -95,21 +116,26 @@ describe('EventBrowser', () => {
     expect(element.querySelector('[role="status"]')!.textContent!.trim()).toBe('2 events');
   });
 
-  it('shows at most four attendees as coloured initials with their names for screen readers', async () => {
+  it('shows at most four attendees as coloured initials with each name beneath', async () => {
     await create(async () => events);
     await store.load();
     await settle();
+    const items = [...cards()[0].querySelectorAll<HTMLElement>('.event__attendee')];
     const people = [...cards()[0].querySelectorAll<HTMLElement>('.event__avatar')];
     expect(people).toHaveLength(4);
-    expect(
-      people.map((person) => person.querySelector('[aria-hidden="true"]')!.textContent),
-    ).toEqual(['TM', 'PM', 'A', 'SD']);
-    expect(people.map((person) => person.querySelector('.sr-only')!.textContent)).toEqual([
+    expect(people.map((person) => person.textContent!.trim())).toEqual(['TM', 'PM', 'A', 'SD']);
+    expect(people.every((person) => person.getAttribute('aria-hidden') === 'true')).toBe(true);
+    // The name sits under its circle, visible to everyone.
+    expect(items.map((item) => item.querySelector('.event__name')!.textContent!.trim())).toEqual([
       'Thandiwe Mokoena',
       'Pieter van der Merwe',
       'Ayesha',
       'Sipho Dlamini',
     ]);
+    items.forEach((item) =>
+      expect(item.firstElementChild!.classList.contains('event__avatar')).toBe(true),
+    );
+    expect(items[0].getAttribute('title')).toBe('Thandiwe Mokoena');
     expect(cards()[0].querySelector('.event__attendees')!.getAttribute('aria-label')).toBe(
       'Attending',
     );
@@ -118,6 +144,94 @@ describe('EventBrowser', () => {
     // Neighbours never share a colour, and the same names always get the same colours.
     colours.slice(1).forEach((colour, i) => expect(colour).not.toBe(colours[i]));
     expect(cards()[1].querySelector('.event__attendees')).toBeNull();
+  });
+
+  describe('"Add me"', () => {
+    const open = [event('jazz', 'Jazz on the Roof', 'Live jazz.', ['Thandiwe Mokoena'])];
+    const add = (card = cards()[0]) => card.querySelector<HTMLElement>('.event__add')!;
+
+    it('asks visitors who aren’t signed in to sign in, then come back to the events', async () => {
+      await create(async () => open);
+      await store.load();
+      await settle();
+      const link = add() as HTMLAnchorElement;
+      expect(link.tagName).toBe('A');
+      expect(link.textContent!.trim()).toBe('Add me');
+      expect(decodeURIComponent(link.getAttribute('href')!)).toBe(
+        '/login?returnUrl=/lift-club/events',
+      );
+      expect(link.getAttribute('aria-label')).toBe('Add me to Jazz on the Roof (sign in first)');
+      expect(api.joined).not.toHaveBeenCalled();
+    });
+
+    it('adds a signed-in member, shows them under a circle, and takes them off again', async () => {
+      await create(async () => open, true);
+      await store.load();
+      await settle();
+      expect(api.joined).toHaveBeenCalledOnce();
+      const joinedEvent = { ...open[0], attendees: ['Thandiwe Mokoena', 'Naledi M.'] };
+      api.attend.mockResolvedValue({ event: joinedEvent, joined: true });
+      expect(add().getAttribute('aria-label')).toBe('Add me to Jazz on the Roof');
+      add().click();
+      await settle();
+      expect(api.attend).toHaveBeenCalledWith('jazz');
+      expect(
+        [...cards()[0].querySelectorAll('.event__name')].map((name) => name.textContent!.trim()),
+      ).toEqual(['Thandiwe Mokoena', 'Naledi M.']);
+      expect(add().textContent!.trim()).toBe('Remove me');
+      expect(add().classList.contains('event__add--joined')).toBe(true);
+
+      api.leave.mockResolvedValue({ event: open[0], joined: false });
+      add().click();
+      await settle();
+      expect(api.leave).toHaveBeenCalledWith('jazz');
+      expect(add().textContent!.trim()).toBe('Add me');
+      expect(cards()[0].querySelectorAll('.event__name')).toHaveLength(1);
+    });
+
+    it('knows which events the member already joined', async () => {
+      await create(async () => open, true);
+      api.joined.mockResolvedValue(['jazz']);
+      await store.load();
+      await settle();
+      expect(add().textContent!.trim()).toBe('Remove me');
+    });
+
+    it('shows Full when four people are on, and explains a late refusal', async () => {
+      const full = event('full', 'Sold Out', 'Packed.', ['A', 'B', 'C', 'D']);
+      await create(async () => [full, open[0]], true);
+      await store.load();
+      await settle();
+      expect(add(cards()[0]).textContent!.trim()).toBe('Full');
+      expect((add(cards()[0]) as HTMLButtonElement).disabled).toBe(true);
+
+      // Someone else took the last place first.
+      const nowFull = { ...open[0], attendees: ['Thandiwe Mokoena', 'X', 'Y', 'Z'] };
+      api.attend.mockRejectedValue(
+        new HttpErrorResponse({
+          status: 409,
+          error: { message: 'This event is full.', event: nowFull },
+        }),
+      );
+      add(cards()[1]).click();
+      await settle();
+      expect(cards()[1].querySelector('[role="alert"]')!.textContent).toContain(
+        'This event is full.',
+      );
+      expect(add(cards()[1]).textContent!.trim()).toBe('Full');
+      expect(cards()[1].querySelectorAll('.event__attendee')).toHaveLength(4);
+    });
+
+    it('forgets the member’s events when they sign out', async () => {
+      await create(async () => open, true);
+      api.joined.mockResolvedValue(['jazz']);
+      await store.load();
+      await settle();
+      user.set(null);
+      await settle();
+      expect(add().tagName).toBe('A');
+      expect(store.joined().size).toBe(0);
+    });
   });
 
   it('searches titles and full descriptions, ignoring case and surrounding spaces', async () => {

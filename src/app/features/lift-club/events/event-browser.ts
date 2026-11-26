@@ -1,5 +1,8 @@
 import { Component, ElementRef, inject, input, output, viewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { LiftEvent } from '../../../core/events/events.service';
+import { LIFT_CLUB_VIEW_URLS } from '../lift-club.routes';
 import { avatarColours } from '../voice-reviews/avatar-colours';
 import { EventStore } from './event-store';
 import { initialsOf } from './initials';
@@ -15,12 +18,15 @@ interface Attendee {
 let nextId = 0;
 
 /**
- * The lift club's published events, in place of the booking times (see DayScheduler and
- * MobileBookingWidget, which switch between the two). Open to everyone, signed in or not.
- * The list and the search live in EventStore, shared by both layouts.
+ * "Transport for Events": the lift club's published events, in place of the booking times
+ * (see DayScheduler and MobileBookingWidget, which switch between the two). Open to
+ * everyone; a signed-in member can add themselves to an event while it has room ("Add me"),
+ * and visitors who aren't signed in are asked to first. The list and the search live in
+ * EventStore, shared by both layouts.
  */
 @Component({
   selector: 'app-event-browser',
+  imports: [RouterLink],
   templateUrl: './event-browser.html',
   styleUrl: './event-browser.scss',
   host: {
@@ -35,7 +41,10 @@ export class EventBrowser {
   readonly back = output<void>();
 
   protected readonly store = inject(EventStore);
+  protected readonly auth = inject(AuthService);
   protected readonly id = `events-${++nextId}`;
+  /** Signing in from "Add me" comes back to the events. */
+  protected readonly signInQuery = { returnUrl: LIFT_CLUB_VIEW_URLS.events };
   private readonly heading = viewChild.required<ElementRef<HTMLElement>>('heading');
   private readonly search = viewChild.required<ElementRef<HTMLInputElement>>('search');
 

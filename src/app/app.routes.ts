@@ -15,12 +15,15 @@ export const routes: Routes = [
     redirectTo: LIFT_CLUB_PAGE.path,
   },
   {
-    // /lift-club, /events and /reviews: one page, which stays on screen as the address
-    // moves between its views (see lift-club.routes.ts).
-    path: '',
+    // /lift-club, /lift-club/events and /lift-club/reviews: one page, which stays on screen as
+    // the address moves between its views (see lift-club.routes.ts).
+    path: LIFT_CLUB_PAGE.path,
     loadComponent: () => import('./features/lift-club/lift-club').then((m) => m.LiftClub),
     children: LIFT_CLUB_CHILD_ROUTES,
   },
+  // The views' first addresses, in case anyone saved or shared them.
+  { path: 'events', pathMatch: 'full', redirectTo: 'lift-club/events' },
+  { path: 'reviews', pathMatch: 'full', redirectTo: 'lift-club/reviews' },
   {
     path: 'referral-business',
     title: 'Referral Business',

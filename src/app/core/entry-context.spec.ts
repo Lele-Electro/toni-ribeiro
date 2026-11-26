@@ -100,22 +100,22 @@ describe('EntryContext', () => {
     expect(entry.homeDisabled()).toBe(true);
   });
 
-  it('treats /events and /reviews as the lift club', async () => {
+  it('treats /lift-club/events and /lift-club/reviews as the lift club', async () => {
     start();
-    await go('/reviews');
+    await go('/lift-club/reviews');
     expect(entry.homeDisabled()).toBe(true);
-    await go('/events');
+    await go('/lift-club/events');
     await go('/lift-club');
     expect(entry.homeDisabled()).toBe(true);
     await go('/login');
-    await go('/events');
+    await go('/lift-club/events');
     expect(entry.homeDisabled()).toBe(true);
   });
 
   it('keeps Home for in-site visitors who open the events', async () => {
     start();
     await go('/privacy');
-    await go('/events');
+    await go('/lift-club/events');
     expect(entry.homeDisabled()).toBe(false);
   });
 

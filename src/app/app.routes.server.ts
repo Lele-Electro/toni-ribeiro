@@ -18,8 +18,11 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender,
   },
   // The lift club shows today's dates and live availability: never built ahead of time.
-  // /events and /reviews are the same page, opened on those views.
+  // Its events and reviews are the same page, opened on those views.
   { path: 'lift-club', renderMode: RenderMode.Server },
+  { path: 'lift-club/events', renderMode: RenderMode.Server },
+  { path: 'lift-club/reviews', renderMode: RenderMode.Server },
+  // Redirects to the two above.
   { path: 'events', renderMode: RenderMode.Server },
   { path: 'reviews', renderMode: RenderMode.Server },
   {

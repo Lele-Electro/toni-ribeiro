@@ -133,6 +133,51 @@ p.events__hint {
   }
 }
 
+// Members who added themselves on the lift club page, with a way to take them off.
+.events__members {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-2);
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+.events__member-name {
+  font-weight: 650;
+}
+
+.events__remove-member {
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  color: var(--color-danger);
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+p.event-form__members {
+  margin: 0 0 var(--space-2);
+}
+
 .events__actions {
   display: flex;
   flex-wrap: wrap;

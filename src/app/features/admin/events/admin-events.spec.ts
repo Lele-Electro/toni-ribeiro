@@ -13,6 +13,7 @@ describe('AdminEvents', () => {
     saveEvent: vi.fn(),
     publishEvent: vi.fn(),
     deleteEvent: vi.fn(),
+    removeEventMember: vi.fn(),
   };
   const stored = (overrides: Partial<AdminEvent> = {}): AdminEvent => ({
     id: 'e1',
@@ -20,6 +21,7 @@ describe('AdminEvents', () => {
     description: 'Live jazz above Maboneng.',
     url: 'https://www.quicket.co.za/events/1/',
     attendees: ['Thandiwe Mokoena', 'Pieter V'],
+    members: [],
     imageRevision: 1,
     published: true,
     createdAt: '2026-11-20T10:00:00.000Z',
@@ -65,6 +67,7 @@ describe('AdminEvents', () => {
     api.saveEvent.mockImplementation(async (draft) => stored({ ...draft, id: 'new' }));
     api.publishEvent.mockResolvedValue(stored());
     api.deleteEvent.mockResolvedValue(undefined);
+    api.removeEventMember.mockResolvedValue(undefined);
     vi.stubGlobal(
       'URL',
       Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:thumb'), revokeObjectURL: vi.fn() }),
@@ -196,6 +199,47 @@ describe('AdminEvents', () => {
       'That image is too large.',
     );
     expect(element.querySelector('form')).not.toBeNull();
+  });
+
+  it('lists members who added themselves, and removes one', async () => {
+    fixture.destroy();
+    const member = { userId: 'u1', name: 'Naledi M.', email: 'naledi@example.com' };
+    api.events.mockResolvedValue([stored({ members: [member] })]);
+    fixture = TestBed.createComponent(AdminEvents);
+    element = fixture.nativeElement;
+    await settle();
+    const row = element.querySelector('.events__row')!;
+    // Everyone on the event, as the lift club page shows them.
+    expect(
+      [...row.querySelectorAll('.events__people .sr-only')].map((name) => name.textContent),
+    ).toEqual(['Thandiwe Mokoena', 'Pieter V', 'Naledi M.']);
+    const listed = row.querySelector('.events__members li')!;
+    expect(listed.textContent).toContain('Naledi M.');
+    expect(listed.querySelector('a')!.getAttribute('href')).toBe('mailto:naledi@example.com');
+    const remove = listed.querySelector<HTMLButtonElement>('button')!;
+    expect(remove.getAttribute('aria-label')).toBe('Remove Naledi M. from Jazz on the Roof');
+    remove.click();
+    await settle();
+    expect(api.removeEventMember).toHaveBeenCalledWith('e1', 'u1');
+    expect(element.querySelector('[role="status"]')!.textContent).toContain(
+      'Removed Naledi M. from “Jazz on the Roof”',
+    );
+  });
+
+  it('leaves room in the form for members who added themselves', async () => {
+    fixture.destroy();
+    const members = ['a', 'b'].map((id) => ({ userId: id, name: id, email: null }));
+    api.events.mockResolvedValue([stored({ members })]);
+    fixture = TestBed.createComponent(AdminEvents);
+    element = fixture.nativeElement;
+    await settle();
+    button('Edit').click();
+    await settle();
+    expect(element.querySelector('.event-form__members')!.textContent).toContain(
+      'room for 2 more names',
+    );
+    // Two names are already typed: no room for a third.
+    expect(button('No more room').disabled).toBe(true);
   });
 
   it('publishes and unpublishes, and deletes only after a second click', async () => {

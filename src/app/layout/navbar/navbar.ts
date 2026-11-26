@@ -19,7 +19,7 @@ import {
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { EntryContext } from '../../core/entry-context';
-import { LIFT_CLUB_SEGMENTS, isUnavailable } from '../../core/navigation';
+import { isLiftClubPath, isUnavailable } from '../../core/navigation';
 import { MobileMenu } from '../mobile-menu/mobile-menu';
 
 @Component({
@@ -70,7 +70,7 @@ export class Navbar {
     const route =
       url.root.children[PRIMARY_OUTLET]?.segments.map((segment) => segment.path).join('/') ?? '';
     if (route === '') return 'home';
-    if (LIFT_CLUB_SEGMENTS.includes(route)) return 'lift-club';
+    if (isLiftClubPath(route)) return 'lift-club';
     if (route === 'schedule' && url.queryParams['service'] === 'general') return 'contact';
     if (['login', 'forgot-password', 'reset-password'].includes(route)) return 'account';
     return 'other';

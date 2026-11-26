@@ -108,13 +108,30 @@ button:disabled {
   border: 0;
   border-top: 1px solid rgb(27 79 67 / 18%);
 }
-// Events, then See reviews: side by side when the column is wide enough. Look and pulse:
-// .events-toggle and .see-reviews in styles/_components.scss.
+// Events and See reviews: equal halves of one row, as wide as the day buttons. In the
+// narrowest columns the labels tighten so both still fit. Look: .events-toggle and
+// .see-reviews in styles/_components.scss.
 .pane-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: clamp(0.5rem, 1.4dvh, 1rem) 0.75rem 0.25rem;
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: clamp(0.5rem, 1.4dvh, 1rem) 0 0.25rem;
+}
+.pane-actions > button {
+  gap: 0.35rem;
+  padding-inline: 0.5rem;
+}
+@container (max-width: 15rem) {
+  .pane-actions > button {
+    gap: 0.25rem;
+    padding-inline: 0.35rem;
+    font-size: 0.75rem;
+  }
+  .pane-actions svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
 }
 // The booking times and the events share one grid cell and cross-fade. The view going
 // away fades first; visibility then hides it (and inert keeps it out of reach throughout).

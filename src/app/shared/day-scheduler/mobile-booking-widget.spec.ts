@@ -1,4 +1,7 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { EventsService } from '../../core/events/events.service';
 import { LiftBooking } from '../../core/lift-bookings/lift-bookings.service';
 import { EventStore } from '../../features/lift-club/events/event-store';
@@ -32,8 +35,10 @@ describe('MobileBookingWidget', () => {
       imports: [MobileBookingWidget],
       // DayScheduler provides the events in the app.
       providers: [
+        provideRouter([]),
         EventStore,
         { provide: EventsService, useValue: { list: async () => [], imageUrl: () => '' } },
+        { provide: AuthService, useValue: { user: signal(null), isAuthenticated: () => false } },
       ],
     });
     fixture = TestBed.createComponent(MobileBookingWidget);

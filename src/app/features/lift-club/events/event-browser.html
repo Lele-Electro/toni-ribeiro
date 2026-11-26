@@ -3,7 +3,7 @@
     <div>
       <p class="eyebrow">What’s on</p>
       <h3 class="events__title" [id]="id + '-heading'" #heading tabindex="-1" data-events-heading>
-        Events
+        Transport for Events
       </h3>
     </div>
     <button type="button" class="events__back" (click)="back.emit()">
@@ -70,24 +70,72 @@
                 decoding="async"
               />
               <div class="event__body">
-                <h4 class="event__title">
-                  <a [href]="event.url" target="_blank" rel="noopener noreferrer"
-                    >{{ event.title }}<span class="sr-only"> (opens in a new tab)</span
-                    ><svg class="event__external" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" /></svg
-                  ></a>
-                </h4>
+                <div class="event__head">
+                  <h4 class="event__title">
+                    <a [href]="event.url" target="_blank" rel="noopener noreferrer"
+                      >{{ event.title }}<span class="sr-only"> (opens in a new tab)</span
+                      ><svg class="event__external" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" /></svg
+                    ></a>
+                  </h4>
+                  <!-- "Add me": the member puts themselves on the event while it has room. -->
+                  @if (store.joined().has(event.id)) {
+                    <button
+                      type="button"
+                      class="event__add event__add--joined"
+                      [disabled]="!!store.pending()"
+                      [attr.aria-label]="'Remove me from ' + event.title"
+                      (click)="store.leave(event)"
+                    >
+                      Remove me
+                    </button>
+                  } @else if (store.isFull(event)) {
+                    <button
+                      type="button"
+                      class="event__add"
+                      disabled
+                      [attr.aria-label]="'Full: ' + event.title + ' has no places left'"
+                    >
+                      Full
+                    </button>
+                  } @else if (auth.isAuthenticated()) {
+                    <button
+                      type="button"
+                      class="event__add"
+                      [disabled]="!!store.pending()"
+                      [attr.aria-busy]="store.pending() === event.id"
+                      [attr.aria-label]="'Add me to ' + event.title"
+                      (click)="store.join(event)"
+                    >
+                      Add me
+                    </button>
+                  } @else {
+                    <a
+                      class="event__add"
+                      routerLink="/login"
+                      [queryParams]="signInQuery"
+                      [attr.aria-label]="'Add me to ' + event.title + ' (sign in first)'"
+                      >Add me</a
+                    >
+                  }
+                </div>
+                @if (store.attendanceError(); as problem) {
+                  @if (problem.id === event.id) {
+                    <p class="event__error" role="alert">{{ problem.message }}</p>
+                  }
+                }
                 <p class="event__description">{{ event.description }}</p>
                 @if (event.attendees.length) {
                   <ul class="event__attendees" role="list" aria-label="Attending">
                     @for (attendee of attendees(event); track $index) {
-                      <li
-                        class="event__avatar"
-                        [style.--avatar]="attendee.colour"
-                        [attr.title]="attendee.name"
-                      >
-                        <span aria-hidden="true">{{ attendee.initials }}</span>
-                        <span class="sr-only">{{ attendee.name }}</span>
+                      <li class="event__attendee" [attr.title]="attendee.name">
+                        <span
+                          class="event__avatar"
+                          [style.--avatar]="attendee.colour"
+                          aria-hidden="true"
+                          >{{ attendee.initials }}</span
+                        >
+                        <span class="event__name">{{ attendee.name }}</span>
                       </li>
                     }
                   </ul>
